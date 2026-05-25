@@ -52,4 +52,30 @@ describe('drawGrid', () => {
       .map((e) => [e.props.x, e.props.y]);
     expect(cellFills).toEqual([[1, 1]]);
   });
+
+  it('draws grid lines when each cell is large enough to read them', () => {
+    const ctx = makeCtx(60, 60);
+    drawGrid(
+      ctx,
+      createGrid(3),
+      { x: 0, y: 0, z: 20 },
+      { width: 60, height: 60 },
+      theme,
+    );
+    const strokes = ctx.__getEvents().filter((e) => e.type === 'stroke');
+    expect(strokes.length).toBeGreaterThan(0);
+  });
+
+  it('omits grid lines when cells are below the readable threshold', () => {
+    const ctx = makeCtx(12, 12);
+    drawGrid(
+      ctx,
+      createGrid(3),
+      { x: 0, y: 0, z: 4 },
+      { width: 12, height: 12 },
+      theme,
+    );
+    const strokes = ctx.__getEvents().filter((e) => e.type === 'stroke');
+    expect(strokes).toEqual([]);
+  });
 });

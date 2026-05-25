@@ -64,4 +64,38 @@ describe('Canvas', () => {
 
     expect(aliveFillsOn(ctx)).toBe(1);
   });
+
+  it('paints multiple cells along a horizontal drag', () => {
+    const { canvas, ctx } = setup();
+    ctx.__clearEvents();
+
+    fireEvent.pointerDown(canvas, { clientX: 5, clientY: 25, pointerId: 1 });
+    for (let x = 10; x <= 45; x += 5) {
+      fireEvent.pointerMove(canvas, { clientX: x, clientY: 25, pointerId: 1 });
+    }
+    fireEvent.pointerUp(canvas, { clientX: 45, clientY: 25, pointerId: 1 });
+
+    expect(aliveFillsOn(ctx)).toBeGreaterThan(1);
+  });
+
+  it('erases along the drag path when the drag starts on an alive cell', () => {
+    const { canvas, ctx } = setup();
+
+    fireEvent.pointerDown(canvas, { clientX: 5, clientY: 25, pointerId: 1 });
+    for (let x = 10; x <= 45; x += 5) {
+      fireEvent.pointerMove(canvas, { clientX: x, clientY: 25, pointerId: 1 });
+    }
+    fireEvent.pointerUp(canvas, { clientX: 45, clientY: 25, pointerId: 1 });
+    const aliveAfterPaint = aliveFillsOn(ctx);
+    expect(aliveAfterPaint).toBeGreaterThan(1);
+    ctx.__clearEvents();
+
+    fireEvent.pointerDown(canvas, { clientX: 5, clientY: 25, pointerId: 2 });
+    for (let x = 10; x <= 45; x += 5) {
+      fireEvent.pointerMove(canvas, { clientX: x, clientY: 25, pointerId: 2 });
+    }
+    fireEvent.pointerUp(canvas, { clientX: 45, clientY: 25, pointerId: 2 });
+
+    expect(aliveFillsOn(ctx)).toBeLessThan(aliveAfterPaint);
+  });
 });

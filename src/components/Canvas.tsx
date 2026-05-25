@@ -34,8 +34,14 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    // Size the drawing buffer at the screen's actual pixel density so retina
+    // displays render at native resolution. CSS size stays at width × height
+    // so layout, pointer coords, and the camera all work in CSS pixels.
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
     const camera = fitCamera(size, { width, height });
-    drawGrid(ctx, grid, camera, { width, height }, theme);
+    drawGrid(ctx, grid, camera, { width, height }, theme, dpr);
   }, [grid, size, width, height, theme]);
 
   const eventToCell = (e: ReactPointerEvent<HTMLCanvasElement>) => {
@@ -83,13 +89,11 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
   return (
     <canvas
       ref={ref}
-      width={width}
-      height={height}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
-      style={{ touchAction: 'none' }}
+      style={{ width, height, touchAction: 'none' }}
     />
   );
 }

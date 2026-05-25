@@ -49,10 +49,36 @@ const aliveFillsOn = (ctx: RecordingContext): number =>
         e.props.height === 1,
     ).length;
 
+function withDevicePixelRatio<T>(value: number, fn: () => T): T {
+  const original = window.devicePixelRatio;
+  Object.defineProperty(window, 'devicePixelRatio', {
+    value,
+    configurable: true,
+  });
+  try {
+    return fn();
+  } finally {
+    Object.defineProperty(window, 'devicePixelRatio', {
+      value: original,
+      configurable: true,
+    });
+  }
+}
+
 describe('Canvas', () => {
   it('renders a canvas element inside the provider', () => {
     const { canvas } = setup();
     expect(canvas).toBeInstanceOf(HTMLCanvasElement);
+  });
+
+  it('sizes the buffer at devicePixelRatio while keeping CSS layout nominal', () => {
+    withDevicePixelRatio(2, () => {
+      const { canvas } = setup(5, 50, 50);
+      expect(canvas.width).toBe(100);
+      expect(canvas.height).toBe(100);
+      expect(canvas.style.width).toBe('50px');
+      expect(canvas.style.height).toBe('50px');
+    });
   });
 
   it('paints one cell on press+release over an empty grid', () => {

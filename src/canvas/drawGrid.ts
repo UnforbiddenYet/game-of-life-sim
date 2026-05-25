@@ -11,12 +11,21 @@ export function drawGrid(
   camera: Camera,
   viewport: Viewport,
   theme: CanvasTheme,
+  devicePixelRatio: number = 1,
 ): void {
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const dpr = devicePixelRatio;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = theme.background;
   ctx.fillRect(0, 0, viewport.width, viewport.height);
 
-  ctx.setTransform(camera.z, 0, 0, camera.z, camera.x * camera.z, camera.y * camera.z);
+  ctx.setTransform(
+    camera.z * dpr,
+    0,
+    0,
+    camera.z * dpr,
+    camera.x * camera.z * dpr,
+    camera.y * camera.z * dpr,
+  );
 
   if (camera.z >= GRID_LINE_MIN_CELL_PX) {
     drawGridLines(ctx, grid.size, camera.z, theme.grid);

@@ -78,4 +78,22 @@ describe('drawGrid', () => {
     const strokes = ctx.__getEvents().filter((e) => e.type === 'stroke');
     expect(strokes).toEqual([]);
   });
+
+  it('scales the transform by devicePixelRatio for hi-DPI buffers', () => {
+    const ctx = makeCtx(60, 60);
+    drawGrid(
+      ctx,
+      createGrid(3),
+      { x: 0, y: 0, z: 5 },
+      { width: 30, height: 30 },
+      theme,
+      2,
+    );
+    const transforms = ctx
+      .__getEvents()
+      .filter((e) => e.type === 'setTransform');
+    // The camera transform must have scale z * dpr = 5 * 2 = 10
+    const cameraTransform = transforms.find((t) => t.props.a === 10);
+    expect(cameraTransform).toBeDefined();
+  });
 });

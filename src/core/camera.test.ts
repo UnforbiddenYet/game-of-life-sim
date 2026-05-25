@@ -4,6 +4,7 @@ import {
   fitCamera,
   panCamera,
   screenToCanvas,
+  screenToCell,
   zoomCamera,
 } from './camera';
 import type { Camera, Point } from '../types/camera';
@@ -95,5 +96,20 @@ describe('fitCamera', () => {
     const cam = fitCamera(10, { width: 100, height: 100 }, 0.1);
     closeTo(canvasToScreen({ x: 0, y: 0 }, cam), { x: 10, y: 10 });
     closeTo(canvasToScreen({ x: 10, y: 10 }, cam), { x: 90, y: 90 });
+  });
+});
+
+describe('screenToCell', () => {
+  it('maps the viewport center to the center cell for a fit camera', () => {
+    const camera = fitCamera(5, { width: 50, height: 50 }, 0);
+    expect(screenToCell({ x: 25, y: 25 }, camera)).toEqual({ x: 2, y: 2 });
+  });
+
+  it('maps a screen point to the cell whose canvas square contains it', () => {
+    // identity camera: canvas units == screen pixels
+    const camera: Camera = { x: 0, y: 0, z: 1 };
+    expect(screenToCell({ x: 0, y: 0 }, camera)).toEqual({ x: 0, y: 0 });
+    expect(screenToCell({ x: 0.9, y: 0.9 }, camera)).toEqual({ x: 0, y: 0 });
+    expect(screenToCell({ x: 1, y: 1 }, camera)).toEqual({ x: 1, y: 1 });
   });
 });

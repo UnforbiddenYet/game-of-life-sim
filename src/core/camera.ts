@@ -6,6 +6,11 @@ export function screenToCanvas(p: Point, c: Camera): Point {
   return { x: p.x / c.z - c.x, y: p.y / c.z - c.y };
 }
 
+export function screenToCell(p: Point, c: Camera): Point {
+  const canvas = screenToCanvas(p, c);
+  return { x: Math.floor(canvas.x), y: Math.floor(canvas.y) };
+}
+
 export function canvasToScreen(p: Point, c: Camera): Point {
   return { x: (p.x + c.x) * c.z, y: (p.y + c.y) * c.z };
 }

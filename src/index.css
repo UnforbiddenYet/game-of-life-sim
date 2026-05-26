@@ -1,11 +1,11 @@
 :root {
-  --bg: #0b0d10;
-  --text: #e8edf2;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: dark;
-  color: var(--text);
-  background: var(--bg);
   -webkit-font-smoothing: antialiased;
+
+  --app-bg: #f7f7f3;
+  --panel-bg: rgba(255, 255, 255, 0.78);
+  --panel-border: rgba(34, 40, 49, 0.12);
+  --panel-shadow: 0 18px 40px rgba(34, 40, 49, 0.08);
+  --canvas-bg: #ffffff;
 }
 
 *,
@@ -19,6 +19,6 @@ body,
 #root {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
 }

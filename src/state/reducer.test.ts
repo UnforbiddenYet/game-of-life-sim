@@ -96,6 +96,67 @@ describe("reducer", () => {
     expect(s1).toBe(s0);
   });
 
+  it("SET_CELL pushes onto past and clears future", () => {
+    let s = initialState(5);
+    s = reducer(s, Actions.step());
+    s = reducer(s, Actions.stepBack());
+    expect(s.future).toHaveLength(1);
+
+    s = reducer(s, Actions.setCell(2, 2, 1));
+
+    expect(s.past).toHaveLength(1);
+    expect(s.future).toHaveLength(0);
+  });
+
+  it("CLEAR clears both history stacks", () => {
+    let s = initialState(5);
+    s = reducer(s, Actions.step());
+    s = reducer(s, Actions.stepBack());
+    expect(s.past.length + s.future.length).toBeGreaterThan(0);
+
+    s = reducer(s, Actions.clear());
+    expect(s.past).toEqual([]);
+    expect(s.future).toEqual([]);
+  });
+
+  it("RANDOMIZE clears both history stacks", () => {
+    let s = initialState(5);
+    s = reducer(s, Actions.step());
+    s = reducer(s, Actions.stepBack());
+
+    s = reducer(s, Actions.randomize(0));
+    expect(s.past).toEqual([]);
+    expect(s.future).toEqual([]);
+  });
+
+  it("IMPORT clears both history stacks", () => {
+    let s = initialState(5);
+    s = reducer(s, Actions.step());
+    s = reducer(s, Actions.stepBack());
+
+    s = reducer(
+      s,
+      Actions.importSnapshot({ size: 5, generation: 0, grid: s.grid }),
+    );
+    expect(s.past).toEqual([]);
+    expect(s.future).toEqual([]);
+  });
+
+  it("PLAY from a navigated-back position clears future but keeps past", () => {
+    let s = initialState(5);
+    s = reducer(s, Actions.step());
+    s = reducer(s, Actions.step());
+    s = reducer(s, Actions.stepBack());
+    expect(s.future).toHaveLength(1);
+    const pastLen = s.past.length;
+
+    s = reducer(s, Actions.play());
+
+    expect(s.mode).toBe("playing");
+    expect(s.future).toEqual([]);
+    expect(s.past).toHaveLength(pastLen);
+  });
+
   it("PLAY transitions mode to playing", () => {
     const s = reducer(initialState(5), Actions.play());
     expect(s.mode).toBe("playing");

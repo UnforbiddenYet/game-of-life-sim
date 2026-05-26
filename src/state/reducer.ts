@@ -61,35 +61,52 @@ export function reducer(state: GameState, action: Action): GameState {
         future: state.future.slice(0, -1),
       };
     }
-    case 'PLAY':
-      return state.mode === 'playing' ? state : { ...state, mode: 'playing' };
+    case 'PLAY': {
+      if (state.mode === 'playing' && state.future.length === 0) return state;
+      return { ...state, mode: 'playing', future: [] };
+    }
     case 'PAUSE':
       return state.mode === 'paused' ? state : { ...state, mode: 'paused' };
     case 'SET_CELL': {
       const grid = cloneGrid(state.grid);
       setCell(grid, action.x, action.y, action.alive);
-      return { ...state, grid };
+      return {
+        ...state,
+        grid,
+        past: [...state.past, snapshot(state)],
+        future: [],
+      };
     }
     case 'CLEAR':
-      return { ...state, grid: createGrid(state.size), generation: 0 };
+      return {
+        ...state,
+        grid: createGrid(state.size),
+        generation: 0,
+        past: [],
+        future: [],
+      };
     case 'RANDOMIZE':
       return {
         ...state,
         grid: randomGrid(state.size, action.density),
         generation: 0,
+        past: [],
+        future: [],
       };
     case 'SET_SPEED':
       return { ...state, stepsPerSecond: clampSps(action.stepsPerSecond) };
     case 'NEW_GAME':
       return initialState(action.size, state.stepsPerSecond);
     case 'IMPORT': {
-      const { snapshot } = action;
+      const { snapshot: snap } = action;
       return {
         ...state,
-        size: snapshot.size,
-        grid: cloneGrid(snapshot.grid),
-        generation: snapshot.generation,
+        size: snap.size,
+        grid: cloneGrid(snap.grid),
+        generation: snap.generation,
         mode: 'paused',
+        past: [],
+        future: [],
       };
     }
   }

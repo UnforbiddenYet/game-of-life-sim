@@ -2,8 +2,7 @@ import type { Action } from '../types/game';
 import type { GameSnapshot } from '../types/serialize';
 
 export const step = (): Action => ({ type: 'STEP' });
-export const stepBack = (): Action => ({ type: 'STEP_BACK' });
-export const stepForward = (): Action => ({ type: 'STEP_FORWARD' });
+export const undo = (): Action => ({ type: 'UNDO' });
 export const play = (): Action => ({ type: 'PLAY' });
 export const pause = (): Action => ({ type: 'PAUSE' });
 export const setCell = (x: number, y: number, alive: 0 | 1): Action => ({

@@ -37,13 +37,15 @@ export function GameProvider({
     stateRef.current = state;
   }, [state]);
 
+  const canUndo = state.past.length > 0;
   const ui = useMemo(
     () => ({
       size: state.size,
       mode: state.mode,
       stepsPerSecond: state.stepsPerSecond,
+      canUndo,
     }),
-    [state.size, state.mode, state.stepsPerSecond],
+    [state.size, state.mode, state.stepsPerSecond, canUndo],
   );
 
   const tick = useMemo(

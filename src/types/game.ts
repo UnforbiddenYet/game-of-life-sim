@@ -15,13 +15,13 @@ export interface GameState {
   readonly mode: Mode;
   readonly stepsPerSecond: number;
   readonly past: readonly HistoryFrame[];
-  readonly future: readonly HistoryFrame[];
 }
 
 export interface GameUi {
   readonly size: number;
   readonly mode: Mode;
   readonly stepsPerSecond: number;
+  readonly canUndo: boolean;
 }
 
 export interface GameTick {
@@ -31,8 +31,7 @@ export interface GameTick {
 
 export type Action =
   | { type: 'STEP' }
-  | { type: 'STEP_BACK' }
-  | { type: 'STEP_FORWARD' }
+  | { type: 'UNDO' }
   | { type: 'PLAY' }
   | { type: 'PAUSE' }
   | { type: 'SET_CELL'; x: number; y: number; alive: 0 | 1 }

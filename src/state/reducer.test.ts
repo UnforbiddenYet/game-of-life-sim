@@ -15,10 +15,9 @@ describe("initialState", () => {
 });
 
 describe("reducer", () => {
-  it("starts with empty history stacks", () => {
+  it("starts with empty history", () => {
     const s = initialState(5);
     expect(s.past).toEqual([]);
-    expect(s.future).toEqual([]);
   });
 
   it("STEP pushes the prior frame onto past", () => {
@@ -51,13 +50,13 @@ describe("reducer", () => {
     expect(aliveCount(s1.grid)).toBe(3);
   });
 
-  it("STEP_BACK on empty past is a no-op", () => {
+  it("UNDO on empty past is a no-op", () => {
     const s0 = initialState(5);
-    const s1 = reducer(s0, Actions.stepBack());
+    const s1 = reducer(s0, Actions.undo());
     expect(s1).toBe(s0);
   });
 
-  it("STEP_BACK after STEP restores the prior grid and generation", () => {
+  it("UNDO after STEP restores the prior grid and generation", () => {
     let s = initialState(5);
     setCell(s.grid, 2, 1, 1);
     setCell(s.grid, 2, 2, 1);
@@ -65,15 +64,14 @@ describe("reducer", () => {
     const before = new Uint8Array(s.grid.cells);
 
     s = reducer(s, Actions.step());
-    s = reducer(s, Actions.stepBack());
+    s = reducer(s, Actions.undo());
 
     expect(s.generation).toBe(0);
     expect(s.grid.cells).toEqual(before);
     expect(s.past).toHaveLength(0);
-    expect(s.future).toHaveLength(1);
   });
 
-  it("STEP then STEP_BACK then STEP_FORWARD round-trips byte-identical", () => {
+  it("STEP then UNDO then STEP recomputes the next gen byte-identically", () => {
     let s = initialState(5);
     setCell(s.grid, 2, 1, 1);
     setCell(s.grid, 2, 2, 1);
@@ -82,79 +80,49 @@ describe("reducer", () => {
     const afterStep = new Uint8Array(s.grid.cells);
     const afterGen = s.generation;
 
-    s = reducer(s, Actions.stepBack());
-    s = reducer(s, Actions.stepForward());
+    s = reducer(s, Actions.undo());
+    s = reducer(s, Actions.step());
 
     expect(s.generation).toBe(afterGen);
     expect(s.grid.cells).toEqual(afterStep);
-    expect(s.future).toHaveLength(0);
   });
 
-  it("STEP_FORWARD on empty future is a no-op", () => {
-    const s0 = initialState(5);
-    const s1 = reducer(s0, Actions.stepForward());
-    expect(s1).toBe(s0);
-  });
-
-  it("SET_CELL pushes onto past and clears future", () => {
+  it("SET_CELL does not touch history", () => {
     let s = initialState(5);
     s = reducer(s, Actions.step());
-    s = reducer(s, Actions.stepBack());
-    expect(s.future).toHaveLength(1);
+    const pastLen = s.past.length;
 
     s = reducer(s, Actions.setCell(2, 2, 1));
 
-    expect(s.past).toHaveLength(1);
-    expect(s.future).toHaveLength(0);
+    expect(s.past).toHaveLength(pastLen);
   });
 
-  it("CLEAR clears both history stacks", () => {
+  it("CLEAR clears history", () => {
     let s = initialState(5);
     s = reducer(s, Actions.step());
-    s = reducer(s, Actions.stepBack());
-    expect(s.past.length + s.future.length).toBeGreaterThan(0);
+    expect(s.past.length).toBeGreaterThan(0);
 
     s = reducer(s, Actions.clear());
     expect(s.past).toEqual([]);
-    expect(s.future).toEqual([]);
   });
 
-  it("RANDOMIZE clears both history stacks", () => {
+  it("RANDOMIZE clears history", () => {
     let s = initialState(5);
     s = reducer(s, Actions.step());
-    s = reducer(s, Actions.stepBack());
 
     s = reducer(s, Actions.randomize(0));
     expect(s.past).toEqual([]);
-    expect(s.future).toEqual([]);
   });
 
-  it("IMPORT clears both history stacks", () => {
+  it("IMPORT clears history", () => {
     let s = initialState(5);
     s = reducer(s, Actions.step());
-    s = reducer(s, Actions.stepBack());
 
     s = reducer(
       s,
       Actions.importSnapshot({ size: 5, generation: 0, grid: s.grid }),
     );
     expect(s.past).toEqual([]);
-    expect(s.future).toEqual([]);
-  });
-
-  it("PLAY from a navigated-back position clears future but keeps past", () => {
-    let s = initialState(5);
-    s = reducer(s, Actions.step());
-    s = reducer(s, Actions.step());
-    s = reducer(s, Actions.stepBack());
-    expect(s.future).toHaveLength(1);
-    const pastLen = s.past.length;
-
-    s = reducer(s, Actions.play());
-
-    expect(s.mode).toBe("playing");
-    expect(s.future).toEqual([]);
-    expect(s.past).toHaveLength(pastLen);
   });
 
   it("PLAY transitions mode to playing", () => {

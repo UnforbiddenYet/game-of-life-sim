@@ -30,7 +30,6 @@ interface Args {
   mode: Mode;
   stepsPerSecond: number;
   canUndo: boolean;
-  canRedo: boolean;
   dispatch: Dispatch<Action>;
 }
 
@@ -43,7 +42,6 @@ export function useGridInteractions({
   mode,
   stepsPerSecond,
   canUndo,
-  canRedo,
   dispatch,
 }: Args) {
   const stroke = useRef<Stroke | null>(null);
@@ -64,23 +62,20 @@ export function useGridInteractions({
     [mode],
   );
 
-  const stepOrRedo = () =>
-    dispatch(canRedo ? Actions.stepForward() : Actions.step());
-
   useHotkeys(
     'right',
     () => {
       if (mode === 'playing') return;
-      stepOrRedo();
+      dispatch(Actions.step());
     },
-    [mode, canRedo],
+    [mode],
   );
 
   useHotkeys(
     'left',
     () => {
       if (mode === 'playing' || !canUndo) return;
-      dispatch(Actions.stepBack());
+      dispatch(Actions.undo());
     },
     [mode, canUndo],
   );

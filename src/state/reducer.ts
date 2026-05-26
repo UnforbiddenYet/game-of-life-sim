@@ -25,7 +25,6 @@ export function initialState(
     mode: 'paused',
     stepsPerSecond,
     past: [],
-    future: [],
   };
 }
 
@@ -37,9 +36,8 @@ export function reducer(state: GameState, action: Action): GameState {
         grid: step(state.grid),
         generation: state.generation + 1,
         past: [...state.past, snapshot(state)],
-        future: [],
       };
-    case 'STEP_BACK': {
+    case 'UNDO': {
       if (state.past.length === 0) return state;
       const prev = state.past[state.past.length - 1] as HistoryFrame;
       return {
@@ -47,35 +45,16 @@ export function reducer(state: GameState, action: Action): GameState {
         grid: cloneGrid(prev.grid),
         generation: prev.generation,
         past: state.past.slice(0, -1),
-        future: [...state.future, snapshot(state)],
       };
     }
-    case 'STEP_FORWARD': {
-      if (state.future.length === 0) return state;
-      const next = state.future[state.future.length - 1] as HistoryFrame;
-      return {
-        ...state,
-        grid: cloneGrid(next.grid),
-        generation: next.generation,
-        past: [...state.past, snapshot(state)],
-        future: state.future.slice(0, -1),
-      };
-    }
-    case 'PLAY': {
-      if (state.mode === 'playing' && state.future.length === 0) return state;
-      return { ...state, mode: 'playing', future: [] };
-    }
+    case 'PLAY':
+      return state.mode === 'playing' ? state : { ...state, mode: 'playing' };
     case 'PAUSE':
       return state.mode === 'paused' ? state : { ...state, mode: 'paused' };
     case 'SET_CELL': {
       const grid = cloneGrid(state.grid);
       setCell(grid, action.x, action.y, action.alive);
-      return {
-        ...state,
-        grid,
-        past: [...state.past, snapshot(state)],
-        future: [],
-      };
+      return { ...state, grid };
     }
     case 'CLEAR':
       return {
@@ -83,7 +62,6 @@ export function reducer(state: GameState, action: Action): GameState {
         grid: createGrid(state.size),
         generation: 0,
         past: [],
-        future: [],
       };
     case 'RANDOMIZE':
       return {
@@ -91,7 +69,6 @@ export function reducer(state: GameState, action: Action): GameState {
         grid: randomGrid(state.size, action.density),
         generation: 0,
         past: [],
-        future: [],
       };
     case 'SET_SPEED':
       return { ...state, stepsPerSecond: clampSps(action.stepsPerSecond) };
@@ -106,7 +83,6 @@ export function reducer(state: GameState, action: Action): GameState {
         generation: snap.generation,
         mode: 'paused',
         past: [],
-        future: [],
       };
     }
   }

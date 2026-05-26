@@ -1,25 +1,12 @@
-import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useGameLoop } from './useGameLoop';
-
-interface ProbeProps {
-  isPlaying: boolean;
-  stepsPerSecond: number;
-  onTick: () => void;
-}
-
-function Probe({ isPlaying, stepsPerSecond, onTick }: ProbeProps) {
-  useGameLoop({ isPlaying, stepsPerSecond, onTick });
-  return null;
-}
+import { useGameLoop, type UseGameLoopArgs } from './useGameLoop';
 
 describe('useGameLoop', () => {
-  let now = 0;
   let nextFrameId = 1;
   let frames = new Map<number, FrameRequestCallback>();
 
   beforeEach(() => {
-    now = 0;
     nextFrameId = 1;
     frames = new Map<number, FrameRequestCallback>();
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
@@ -37,17 +24,18 @@ describe('useGameLoop', () => {
   });
 
   function advanceTo(timestamp: number) {
-    now = timestamp;
     const pending = [...frames.entries()];
     frames.clear();
     for (const [, callback] of pending) {
-      callback(now);
+      callback(timestamp);
     }
   }
 
   it('ticks at the requested steps per second while playing', () => {
     const onTick = vi.fn();
-    render(<Probe isPlaying stepsPerSecond={2} onTick={onTick} />);
+    renderHook((args: UseGameLoopArgs) => useGameLoop(args), {
+      initialProps: { isPlaying: true, stepsPerSecond: 2, onTick },
+    });
 
     advanceTo(0);
     advanceTo(0);
@@ -66,15 +54,18 @@ describe('useGameLoop', () => {
 
   it('stops ticking when paused', () => {
     const onTick = vi.fn();
-    const { rerender } = render(
-      <Probe isPlaying stepsPerSecond={10} onTick={onTick} />,
+    const { rerender } = renderHook(
+      (args: UseGameLoopArgs) => useGameLoop(args),
+      {
+        initialProps: { isPlaying: true, stepsPerSecond: 10, onTick },
+      },
     );
 
     advanceTo(0);
     advanceTo(100);
     expect(onTick).toHaveBeenCalledTimes(1);
 
-    rerender(<Probe isPlaying={false} stepsPerSecond={10} onTick={onTick} />);
+    rerender({ isPlaying: false, stepsPerSecond: 10, onTick });
     advanceTo(200);
     advanceTo(300);
 

@@ -1,11 +1,5 @@
 :root {
   -webkit-font-smoothing: antialiased;
-
-  --app-bg: #f7f7f3;
-  --panel-bg: rgba(255, 255, 255, 0.78);
-  --panel-border: rgba(34, 40, 49, 0.12);
-  --panel-shadow: 0 18px 40px rgba(34, 40, 49, 0.08);
-  --canvas-bg: #ffffff;
 }
 
 *,

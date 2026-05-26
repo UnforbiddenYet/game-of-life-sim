@@ -1,0 +1,65 @@
+import { useCallback, useEffect, useState } from 'react';
+import { fromJSON, toJSON } from '../core/serialize';
+import * as Actions from '../state/actions';
+import { useGameDispatch, useGameStateRef } from '../state/hooks';
+import type { GameState } from '../types/game';
+
+export interface UseImportExport {
+  exportGame: () => void;
+  importGame: (file: File) => Promise<void>;
+  importError: string | null;
+  dismissError: () => void;
+}
+
+const ERROR_TIMEOUT_MS = 6000;
+
+export function useImportExport(): UseImportExport {
+  const stateRef = useGameStateRef();
+  const dispatch = useGameDispatch();
+  const [importError, setImportError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (importError === null) return;
+    const id = window.setTimeout(() => setImportError(null), ERROR_TIMEOUT_MS);
+    return () => window.clearTimeout(id);
+  }, [importError]);
+
+  const exportGame = useCallback(() => {
+    downloadGame(stateRef.current);
+  }, [stateRef]);
+
+  const importGame = useCallback(
+    async (file: File): Promise<void> => {
+      try {
+        const text = await file.text();
+        const parsed: unknown = JSON.parse(text);
+        const snapshot = fromJSON(parsed);
+        dispatch(Actions.importSnapshot(snapshot));
+        setImportError(null);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setImportError(`Import failed: ${message}`);
+      }
+    },
+    [dispatch],
+  );
+
+  const dismissError = useCallback(() => setImportError(null), []);
+
+  return { exportGame, importGame, importError, dismissError };
+}
+
+function downloadGame(state: GameState): void {
+  const json = toJSON(state);
+  const blob = new Blob([JSON.stringify(json)], {
+    type: 'application/json',
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `game-of-life-${json.size}x${json.size}-gen${json.generation}.json`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}

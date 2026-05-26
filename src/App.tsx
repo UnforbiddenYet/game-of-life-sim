@@ -40,7 +40,7 @@ function AppShell() {
   });
 
   return (
-    <Theme appearance="dark" accentColor="gray" radius="large">
+    <Theme appearance="light" accentColor="green" radius="large">
       <Flex className="app-shell" direction="column">
         <Toolbar
           mode={mode}

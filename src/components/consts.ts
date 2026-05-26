@@ -2,9 +2,9 @@ import type { CanvasTheme } from "../types/canvas";
 import type { Shortcut } from "../types/ui";
 
 export const DEFAULT_THEME: CanvasTheme = {
-  background: "#0b0d10",
-  grid: "#1f242b",
-  alive: "#e8edf2",
+  background: "#eef1ef",
+  grid: "#dde2de",
+  alive: "#2f7d5e",
 };
 
 export const SHORTCUTS: readonly Shortcut[] = [

@@ -1,7 +1,13 @@
-import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  type PointerEvent as ReactPointerEvent,
+  type WheelEvent as ReactWheelEvent,
+} from 'react';
 import { drawGrid } from '../canvas/drawGrid';
-import { fitCamera, screenToCell } from '../core/camera';
+import { screenToCell, zoomCamera } from '../core/camera';
 import { getCell, inBounds } from '../core/grid';
+import { useCamera } from '../hooks/useCamera';
 import * as Actions from '../state/actions';
 import { useGameDispatch, useGameState } from '../state/hooks';
 import type { CanvasTheme } from '../types/canvas';
@@ -11,6 +17,9 @@ const DEFAULT_THEME: CanvasTheme = {
   grid: '#1f242b',
   alive: '#e8edf2',
 };
+
+// Tuned for natural feel with both mouse wheels and trackpad pinch.
+const WHEEL_ZOOM_SENSITIVITY = 0.001;
 
 export interface CanvasProps {
   width: number;
@@ -28,6 +37,7 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
   const stroke = useRef<Stroke | null>(null);
   const dispatch = useGameDispatch();
   const { grid, size } = useGameState();
+  const [camera, setCamera] = useCamera(size, { width, height });
 
   useEffect(() => {
     const canvas = ref.current;
@@ -40,19 +50,20 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
     const dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
-    const camera = fitCamera(size, { width, height });
     drawGrid(ctx, grid, camera, { width, height }, theme, dpr);
-  }, [grid, size, width, height, theme]);
+  }, [grid, camera, width, height, theme]);
 
-  const eventToCell = (e: ReactPointerEvent<HTMLCanvasElement>) => {
+  const cursorOf = (e: { clientX: number; clientY: number }) => {
     const canvas = ref.current;
     if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
-    const camera = fitCamera(size, { width, height });
-    const cell = screenToCell(
-      { x: e.clientX - rect.left, y: e.clientY - rect.top },
-      camera,
-    );
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  };
+
+  const eventToCell = (e: ReactPointerEvent<HTMLCanvasElement>) => {
+    const cursor = cursorOf(e);
+    if (!cursor) return null;
+    const cell = screenToCell(cursor, camera);
     if (!inBounds(size, cell.x, cell.y)) return null;
     return cell;
   };
@@ -86,6 +97,13 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
     }
   };
 
+  const onWheel = (e: ReactWheelEvent<HTMLCanvasElement>) => {
+    const cursor = cursorOf(e);
+    if (!cursor) return;
+    const dz = e.deltaY * WHEEL_ZOOM_SENSITIVITY;
+    setCamera((c) => zoomCamera(c, cursor, dz));
+  };
+
   return (
     <canvas
       ref={ref}
@@ -93,6 +111,7 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onWheel={onWheel}
       style={{ width, height, touchAction: 'none' }}
     />
   );

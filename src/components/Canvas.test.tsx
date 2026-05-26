@@ -104,6 +104,25 @@ describe('Canvas', () => {
     expect(aliveFillsOn(ctx)).toBeGreaterThan(1);
   });
 
+  it('zooms in on wheel up (deltaY < 0), increasing the draw transform scale', () => {
+    const { canvas, ctx } = setup();
+    const scaleOf = (c: RecordingContext) =>
+      c
+        .__getEvents()
+        .filter((e) => e.type === 'setTransform')
+        .map((e) => e.props.a as number)
+        .reduce((max, a) => Math.max(max, a), 0);
+
+    const scaleBefore = scaleOf(ctx);
+    expect(scaleBefore).toBeGreaterThan(0);
+    ctx.__clearEvents();
+
+    fireEvent.wheel(canvas, { deltaY: -100, clientX: 25, clientY: 25 });
+
+    const scaleAfter = scaleOf(ctx);
+    expect(scaleAfter).toBeGreaterThan(scaleBefore);
+  });
+
   it('erases along the drag path when the drag starts on an alive cell', () => {
     const { canvas, ctx } = setup();
 

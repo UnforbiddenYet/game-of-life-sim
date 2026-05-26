@@ -1,18 +1,18 @@
-import { Box, Flex, IconButton, Theme } from '@radix-ui/themes';
-import { HelpCircle } from 'lucide-react';
-import { useRef, useState } from 'react';
-import { Canvas } from './components/Canvas';
-import { ShortcutsDialog } from './components/ShortcutsDialog';
-import { SizeDialog } from './components/SizeDialog';
-import { Toolbar } from './components/Toolbar';
-import { useElementSize } from './hooks/useElementSize';
-import { useGameLoop } from './hooks/useGameLoop';
-import * as Actions from './state/actions';
-import { GameProvider } from './state/context';
-import { useGameDispatch, useGameUi } from './state/hooks';
+import { Box, Flex, IconButton, Theme } from "@radix-ui/themes";
+import { HelpCircle } from "lucide-react";
+import { useRef, useState } from "react";
+import { Canvas } from "./components/Canvas";
+import { ShortcutsDialog } from "./components/ShortcutsDialog";
+import { SizeDialog } from "./components/SizeDialog";
+import { Toolbar } from "./components/Toolbar";
+import { useElementSize } from "./hooks/useElementSize";
+import { useGameLoop } from "./hooks/useGameLoop";
+import * as Actions from "./state/actions";
+import { GameProvider } from "./state/context";
+import { useGameDispatch, useGameUi } from "./state/hooks";
 
-import '@radix-ui/themes/styles.css';
-import './styles/styles.css';
+import "@radix-ui/themes/styles.css";
+import "./styles/styles.css";
 
 export default function App() {
   return (
@@ -31,7 +31,7 @@ function AppShell() {
   const dispatch = useGameDispatch();
 
   useGameLoop({
-    isPlaying: mode === 'playing',
+    isPlaying: mode === "playing",
     stepsPerSecond,
     onTick: () => dispatch(Actions.step()),
   });
@@ -43,9 +43,7 @@ function AppShell() {
           mode={mode}
           stepsPerSecond={stepsPerSecond}
           onTogglePlayPause={() =>
-            dispatch(
-              mode === 'playing' ? Actions.pause() : Actions.play(),
-            )
+            dispatch(mode === "playing" ? Actions.pause() : Actions.play())
           }
           onStep={() => dispatch(Actions.step())}
           onClear={() => dispatch(Actions.clear())}
@@ -75,7 +73,7 @@ function AppShell() {
         <IconButton
           className="help-fab"
           aria-label="Show keyboard shortcuts"
-          variant="soft"
+          variant="solid"
           color="gray"
           radius="full"
           size="3"

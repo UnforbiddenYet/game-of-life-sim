@@ -1,20 +1,5 @@
 import { Dialog, Flex, Button, Text } from "@radix-ui/themes";
-
-export interface Shortcut {
-  readonly keys: readonly string[];
-  readonly label: string;
-}
-
-export const SHORTCUTS: readonly Shortcut[] = [
-  { keys: ["K"], label: "Play / pause" },
-  { keys: ["→"], label: "Step (when paused)" },
-  { keys: ["C"], label: "Clear grid" },
-  { keys: ["R"], label: "Randomize grid" },
-  { keys: ["]"], label: "Speed up" },
-  { keys: ["["], label: "Slow down" },
-  { keys: ["Space", "+ drag"], label: "Pan canvas" },
-  { keys: ["Scroll"], label: "Zoom toward cursor" },
-];
+import { SHORTCUTS } from "./consts";
 
 export interface ShortcutsDialogProps {
   open: boolean;

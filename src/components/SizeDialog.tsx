@@ -1,6 +1,6 @@
-import { Box, Button, Dialog, Flex, Text, TextField } from '@radix-ui/themes';
-import { useState, type FormEvent } from 'react';
-import { MAX_SIZE, MIN_SIZE } from '../core/grid';
+import { Box, Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
+import { useState, type SubmitEvent } from "react";
+import { MAX_SIZE, MIN_SIZE } from "../core/grid";
 
 export interface SizeDialogProps {
   open: boolean;
@@ -11,11 +11,11 @@ export interface SizeDialogProps {
 
 function validateSize(value: string): string | null {
   const size = Number(value);
-  if (!Number.isFinite(size) || value.trim() === '') {
-    return 'Enter a whole number.';
+  if (!Number.isFinite(size) || value.trim() === "") {
+    return "Enter a whole number.";
   }
   if (!Number.isInteger(size)) {
-    return 'Grid size must be a whole number.';
+    return "Grid size must be a whole number.";
   }
   if (size < MIN_SIZE || size > MAX_SIZE) {
     return `Grid size must be between ${MIN_SIZE} and ${MAX_SIZE}.`;
@@ -51,7 +51,7 @@ function SizeDialogContent({ currentSize, onSubmit }: SizeDialogContentProps) {
   const [value, setValue] = useState(String(currentSize));
   const [error, setError] = useState<string | null>(null);
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const validationError = validateSize(value);
     if (validationError) {
@@ -63,7 +63,7 @@ function SizeDialogContent({ currentSize, onSubmit }: SizeDialogContentProps) {
   };
 
   return (
-    <Dialog.Content maxWidth="28rem" style={{ backdropFilter: 'blur(16px)' }}>
+    <Dialog.Content maxWidth="28rem" style={{ backdropFilter: "blur(16px)" }}>
       <Dialog.Title>Start a new game</Dialog.Title>
       <Dialog.Description>
         Pick a square grid size between 3 and 1000.

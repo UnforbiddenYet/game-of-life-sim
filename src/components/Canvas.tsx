@@ -1,16 +1,10 @@
-import { useRef } from 'react';
-import { useCamera } from '../hooks/useCamera';
-import { useCanvasDraw } from '../hooks/useCanvasDraw';
-import { useGridInteractions } from '../hooks/useGridInteractions';
-import { useGameDispatch, useGameState } from '../state/hooks';
-import type { CanvasTheme } from '../types/canvas';
-
-const DEFAULT_THEME: CanvasTheme = {
-  background: '#0b0d10',
-  grid: '#1f242b',
-  alive: '#e8edf2',
-};
-
+import { useRef } from "react";
+import { useCamera } from "../hooks/useCamera";
+import { useCanvasDraw } from "../hooks/useCanvasDraw";
+import { useGridInteractions } from "../hooks/useGridInteractions";
+import { useGameDispatch, useGameState } from "../state/hooks";
+import type { CanvasTheme } from "../types/canvas";
+import { DEFAULT_THEME } from "./consts";
 export interface CanvasProps {
   width: number;
   height: number;
@@ -35,7 +29,5 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
     dispatch,
   });
 
-  return (
-    <canvas ref={ref} style={{ width, height, touchAction: 'none' }} />
-  );
+  return <canvas ref={ref} style={{ width, height, touchAction: "none" }} />;
 }

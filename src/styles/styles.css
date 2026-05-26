@@ -81,6 +81,31 @@
   background: var(--gray-2);
 }
 
+.canvas-status {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: var(--color-panel-solid);
+  border-radius: 999px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 0 0 1px var(--gray-a4);
+  z-index: 1;
+}
+
+.playback-dock {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-panel-solid);
+  border-radius: 999px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px var(--gray-a4);
+  z-index: 1;
+}
+
 .side-panel {
   flex: 0 0 360px;
   min-height: 0;

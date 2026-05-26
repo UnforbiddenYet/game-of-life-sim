@@ -1,86 +1,26 @@
 import { Badge, Box, Button, Flex, Slider, Text } from '@radix-ui/themes';
-import {
-  Eraser,
-  Pause,
-  Play,
-  Shuffle,
-  SkipForward,
-  SquarePen,
-  Undo2,
-} from 'lucide-react';
-import type { Mode } from '../types/game';
+import { Shuffle, SquarePen } from 'lucide-react';
 import { Stats } from './Stats';
 
 export interface ToolbarProps {
-  mode: Mode;
   stepsPerSecond: number;
-  canUndo: boolean;
-  onTogglePlayPause: () => void;
-  onStep: () => void;
-  onUndo: () => void;
-  onClear: () => void;
   onRandomize: () => void;
   onOpenNewGame: () => void;
   onSetSpeed: (stepsPerSecond: number) => void;
 }
 
 export function Toolbar({
-  mode,
   stepsPerSecond,
-  canUndo,
-  onTogglePlayPause,
-  onStep,
-  onUndo,
-  onClear,
   onRandomize,
   onOpenNewGame,
   onSetSpeed,
 }: ToolbarProps) {
-  const isPlaying = mode === 'playing';
-
   return (
     <Box asChild className="toolbar-surface" px="4" py="3">
       <div>
         <Flex align="center" justify="between" gap="4" wrap="wrap">
           <Flex align="center" gap="4" wrap="wrap">
             <Flex aria-label="Simulation controls" gap="2" wrap="wrap">
-              <Button
-                type="button"
-                aria-label={isPlaying ? 'Pause simulation' : 'Play simulation'}
-                onClick={onTogglePlayPause}
-                variant="solid"
-                className="toolbar-button"
-              >
-                {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                <span>{isPlaying ? 'Pause' : 'Play'}</span>
-              </Button>
-
-              <Button
-                type="button"
-                aria-label="Undo last step"
-                onClick={onUndo}
-                disabled={isPlaying || !canUndo}
-                variant="soft"
-                color="gray"
-                className="toolbar-button"
-              >
-                <Undo2 size={16} />
-                <span>Undo</span>
-              </Button>
-
-              <Button
-                type="button"
-                aria-label="Step simulation"
-                onClick={onStep}
-                disabled={isPlaying}
-                variant="soft"
-                color="gray"
-                className="toolbar-button"
-              >
-                <SkipForward size={16} />
-                <span>Step</span>
-              </Button>
-
               <Button
                 type="button"
                 aria-label="Randomize grid"
@@ -91,18 +31,6 @@ export function Toolbar({
               >
                 <Shuffle size={16} />
                 <span>Randomize</span>
-              </Button>
-
-              <Button
-                type="button"
-                aria-label="Clear grid"
-                onClick={onClear}
-                variant="soft"
-                color="gray"
-                className="toolbar-button"
-              >
-                <Eraser size={16} />
-                <span>Clear</span>
               </Button>
 
               <Button

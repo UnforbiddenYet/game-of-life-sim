@@ -1,9 +1,10 @@
-import { useMemo, useReducer, type ReactNode } from 'react';
+import { useMemo, useReducer, useRef, type ReactNode } from 'react';
 import { aliveCount } from '../core/grid';
 import { DEFAULT_SIZE, DEFAULT_SPS, initialState, reducer } from './reducer';
 import {
   DispatchContext,
   StateContext,
+  StateRefContext,
   TickContext,
   UiContext,
 } from './hooks';
@@ -23,6 +24,11 @@ export function GameProvider({
     initialState(size, stepsPerSecond),
   );
 
+  // Kept in sync with the latest committed state so handlers can read on
+  // demand without forcing a tick-rate re-render on subscribers.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   const ui = useMemo(
     () => ({
       size: state.size,
@@ -40,9 +46,11 @@ export function GameProvider({
   return (
     <DispatchContext.Provider value={dispatch}>
       <StateContext.Provider value={state}>
-        <UiContext.Provider value={ui}>
-          <TickContext.Provider value={tick}>{children}</TickContext.Provider>
-        </UiContext.Provider>
+        <StateRefContext.Provider value={stateRef}>
+          <UiContext.Provider value={ui}>
+            <TickContext.Provider value={tick}>{children}</TickContext.Provider>
+          </UiContext.Provider>
+        </StateRefContext.Provider>
       </StateContext.Provider>
     </DispatchContext.Provider>
   );

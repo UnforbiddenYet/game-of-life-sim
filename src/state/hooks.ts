@@ -1,7 +1,13 @@
-import { createContext, useContext, type Dispatch } from 'react';
+import {
+  createContext,
+  useContext,
+  type Dispatch,
+  type RefObject,
+} from 'react';
 import type { Action, GameState, GameTick, GameUi } from '../types/game';
 
 export const StateContext = createContext<GameState | null>(null);
+export const StateRefContext = createContext<RefObject<GameState> | null>(null);
 export const DispatchContext = createContext<Dispatch<Action> | null>(null);
 export const UiContext = createContext<GameUi | null>(null);
 export const TickContext = createContext<GameTick | null>(null);
@@ -12,6 +18,17 @@ export function useGameState(): GameState {
     throw new Error('useGameState must be used inside <GameProvider>');
   }
   return state;
+}
+
+// Read-latest access without subscribing to tick changes. Use this when an
+// event handler needs the current grid but the component shouldn't re-render
+// every simulation step (see §3.3a — context split).
+export function useGameStateRef(): RefObject<GameState> {
+  const ref = useContext(StateRefContext);
+  if (ref === null) {
+    throw new Error('useGameStateRef must be used inside <GameProvider>');
+  }
+  return ref;
 }
 
 export function useGameDispatch(): Dispatch<Action> {

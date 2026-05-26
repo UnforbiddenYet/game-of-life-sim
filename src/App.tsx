@@ -1,12 +1,12 @@
 import { Box, Callout, Flex, IconButton, Theme } from "@radix-ui/themes";
 import { AlertTriangle, HelpCircle, X } from "lucide-react";
-import { useRef, useState } from "react";
-import { Canvas } from "./components/Canvas";
+import { useState } from "react";
+import { CanvasPanel } from "./components/CanvasPanel";
 import { Header } from "./components/Header";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
+import { SidePanel } from "./components/SidePanel";
 import { SizeDialog } from "./components/SizeDialog";
 import { Toolbar } from "./components/Toolbar";
-import { useElementSize } from "./hooks/useElementSize";
 import { useGameLoop } from "./hooks/useGameLoop";
 import { useImportExport } from "./hooks/useImportExport";
 import * as Actions from "./state/actions";
@@ -25,8 +25,6 @@ export default function App() {
 }
 
 function AppShell() {
-  const canvasContainerRef = useRef<HTMLDivElement | null>(null);
-  const { width, height } = useElementSize(canvasContainerRef);
   const [isSizeDialogOpen, setIsSizeDialogOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { mode, size, stepsPerSecond, canUndo } = useGameUi();
@@ -59,13 +57,10 @@ function AppShell() {
           onSetSpeed={(sps) => dispatch(Actions.setSpeed(sps))}
         />
 
-        <Box asChild className="canvas-shell" p="4">
-          <main ref={canvasContainerRef}>
-            {width > 0 && height > 0 ? (
-              <Canvas width={width} height={height} />
-            ) : null}
-          </main>
-        </Box>
+        <Flex className="workspace" gap="4" px="5" pb="5">
+          <CanvasPanel />
+          <SidePanel />
+        </Flex>
 
         <SizeDialog
           open={isSizeDialogOpen}

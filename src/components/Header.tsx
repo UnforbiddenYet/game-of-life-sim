@@ -43,7 +43,6 @@ export function Header({ onExport, onImport }: HeaderProps) {
             aria-label="Export grid as JSON"
             variant="surface"
             color="gray"
-            highContrast
             onClick={onExport}
           >
             <Download size={16} />
@@ -54,7 +53,6 @@ export function Header({ onExport, onImport }: HeaderProps) {
             aria-label="Import grid from JSON"
             variant="surface"
             color="gray"
-            highContrast
             onClick={() => fileInputRef.current?.click()}
           >
             <Upload size={16} />

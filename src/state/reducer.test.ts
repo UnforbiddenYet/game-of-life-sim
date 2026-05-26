@@ -114,6 +114,13 @@ describe("reducer", () => {
     expect(s.past).toEqual([]);
   });
 
+  it("STEP evicts the oldest frame when past exceeds the size-based cap", () => {
+    let s = initialState(1000);
+    for (let i = 0; i < 25; i++) s = reducer(s, Actions.step());
+    expect(s.past.length).toBe(20);
+    expect(s.past[0]?.generation).toBe(5);
+  });
+
   it("IMPORT clears history", () => {
     let s = initialState(5);
     s = reducer(s, Actions.step());

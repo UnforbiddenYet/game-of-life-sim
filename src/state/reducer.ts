@@ -1,5 +1,6 @@
 import type { Action, GameState, HistoryFrame } from '../types/game';
 import { cloneGrid, createGrid, randomGrid, setCell } from '../core/grid';
+import { pushBounded } from '../core/history';
 import { step } from '../core/step';
 
 function snapshot(state: GameState): HistoryFrame {
@@ -35,7 +36,7 @@ export function reducer(state: GameState, action: Action): GameState {
         ...state,
         grid: step(state.grid),
         generation: state.generation + 1,
-        past: [...state.past, snapshot(state)],
+        past: pushBounded(state.past, snapshot(state), state.size),
       };
     case 'UNDO': {
       if (state.past.length === 0) return state;

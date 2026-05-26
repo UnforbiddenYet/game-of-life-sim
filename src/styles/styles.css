@@ -3,6 +3,22 @@
   background: var(--color-background);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}
+
+.header-dot {
+  font-size: 0.7em;
+  line-height: 1;
+}
+
 .toolbar-surface {
   border-bottom: 1px solid var(--gray-a4);
   background: var(--color-panel-translucent);

@@ -39,8 +39,6 @@ function renderToolbar(
     onRandomize: vi.fn(),
     onOpenNewGame: vi.fn(),
     onSetSpeed: vi.fn(),
-    onExport: vi.fn(),
-    onImport: vi.fn(),
     onUndo: vi.fn(),
     canUndo: false,
     ...overrides,
@@ -103,25 +101,4 @@ describe('Toolbar', () => {
     expect(props.onUndo).toHaveBeenCalledTimes(1);
   });
 
-  it('Export button triggers onExport', () => {
-    const props = renderToolbar();
-    fireEvent.click(screen.getByRole('button', { name: /export grid/i }));
-    expect(props.onExport).toHaveBeenCalledTimes(1);
-  });
-
-  it('selecting a file via Import calls onImport with that file', async () => {
-    const props = renderToolbar();
-    const user = userEvent.setup();
-
-    const file = new File(['{"version":1}'], 'game.json', {
-      type: 'application/json',
-    });
-    const fileInput = screen.getByLabelText(
-      /import grid from json file/i,
-    ) as HTMLInputElement;
-    await user.upload(fileInput, file);
-
-    expect(props.onImport).toHaveBeenCalledTimes(1);
-    expect(props.onImport).toHaveBeenCalledWith(file);
-  });
 });

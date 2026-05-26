@@ -2,6 +2,7 @@ import { Box, Callout, Flex, IconButton, Theme } from "@radix-ui/themes";
 import { AlertTriangle, HelpCircle, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Canvas } from "./components/Canvas";
+import { Header } from "./components/Header";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { SizeDialog } from "./components/SizeDialog";
 import { Toolbar } from "./components/Toolbar";
@@ -42,6 +43,7 @@ function AppShell() {
   return (
     <Theme appearance="light" accentColor="green" radius="large">
       <Flex className="app-shell" direction="column">
+        <Header onExport={exportGame} onImport={importGame} />
         <Toolbar
           mode={mode}
           stepsPerSecond={stepsPerSecond}
@@ -55,8 +57,6 @@ function AppShell() {
           onRandomize={() => dispatch(Actions.randomize(0.3))}
           onOpenNewGame={() => setIsSizeDialogOpen(true)}
           onSetSpeed={(sps) => dispatch(Actions.setSpeed(sps))}
-          onExport={exportGame}
-          onImport={importGame}
         />
 
         <Box asChild className="canvas-shell" p="4">

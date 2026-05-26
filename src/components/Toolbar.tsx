@@ -1,12 +1,15 @@
 import { Badge, Box, Button, Flex, Slider, Text } from '@radix-ui/themes';
 import {
+  Download,
   Eraser,
   Pause,
   Play,
   Shuffle,
   SkipForward,
   SquarePen,
+  Upload,
 } from 'lucide-react';
+import { useRef } from 'react';
 import type { Mode } from '../types/game';
 import { Stats } from './Stats';
 
@@ -19,6 +22,8 @@ export interface ToolbarProps {
   onRandomize: () => void;
   onOpenNewGame: () => void;
   onSetSpeed: (stepsPerSecond: number) => void;
+  onExport: () => void;
+  onImport: (file: File) => void;
 }
 
 export function Toolbar({
@@ -30,8 +35,11 @@ export function Toolbar({
   onRandomize,
   onOpenNewGame,
   onSetSpeed,
+  onExport,
+  onImport,
 }: ToolbarProps) {
   const isPlaying = mode === 'playing';
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <Box asChild className="toolbar-surface" px="4" py="3">
@@ -107,6 +115,51 @@ export function Toolbar({
                 <SquarePen size={16} />
                 <span>Change size</span>
               </Button>
+
+              <Button
+                type="button"
+                aria-label="Export grid as JSON"
+                onClick={onExport}
+                variant="soft"
+                color="gray"
+                className="toolbar-button"
+              >
+                <Download size={16} />
+                <span>Export</span>
+              </Button>
+
+              <Button
+                type="button"
+                aria-label="Import grid from JSON"
+                onClick={() => fileInputRef.current?.click()}
+                variant="soft"
+                color="gray"
+                className="toolbar-button"
+              >
+                <Upload size={16} />
+                <span>Import</span>
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/json,.json"
+                aria-label="Import grid from JSON file"
+                style={{
+                  position: 'absolute',
+                  width: 1,
+                  height: 1,
+                  padding: 0,
+                  margin: -1,
+                  overflow: 'hidden',
+                  clip: 'rect(0 0 0 0)',
+                  border: 0,
+                }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onImport(file);
+                  e.target.value = '';
+                }}
+              />
             </Flex>
           </Flex>
 

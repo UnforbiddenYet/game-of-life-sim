@@ -50,6 +50,8 @@ function AppShell() {
           onRandomize={() => dispatch(Actions.randomize(0.3))}
           onOpenNewGame={() => setIsSizeDialogOpen(true)}
           onSetSpeed={(sps) => dispatch(Actions.setSpeed(sps))}
+          onExport={() => {}}
+          onImport={() => {}}
         />
 
         <Box asChild className="canvas-shell" p="4">

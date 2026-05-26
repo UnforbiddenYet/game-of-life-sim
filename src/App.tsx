@@ -1,5 +1,5 @@
-import { Box, Flex, IconButton, Theme } from "@radix-ui/themes";
-import { HelpCircle } from "lucide-react";
+import { Box, Callout, Flex, IconButton, Theme } from "@radix-ui/themes";
+import { AlertTriangle, HelpCircle, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Canvas } from "./components/Canvas";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
@@ -7,6 +7,7 @@ import { SizeDialog } from "./components/SizeDialog";
 import { Toolbar } from "./components/Toolbar";
 import { useElementSize } from "./hooks/useElementSize";
 import { useGameLoop } from "./hooks/useGameLoop";
+import { useImportExport } from "./hooks/useImportExport";
 import * as Actions from "./state/actions";
 import { GameProvider } from "./state/context";
 import { useGameDispatch, useGameUi } from "./state/hooks";
@@ -29,6 +30,8 @@ function AppShell() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { mode, size, stepsPerSecond } = useGameUi();
   const dispatch = useGameDispatch();
+  const { exportGame, importGame, importError, dismissError } =
+    useImportExport();
 
   useGameLoop({
     isPlaying: mode === "playing",
@@ -50,8 +53,8 @@ function AppShell() {
           onRandomize={() => dispatch(Actions.randomize(0.3))}
           onOpenNewGame={() => setIsSizeDialogOpen(true)}
           onSetSpeed={(sps) => dispatch(Actions.setSpeed(sps))}
-          onExport={() => {}}
-          onImport={() => {}}
+          onExport={exportGame}
+          onImport={importGame}
         />
 
         <Box asChild className="canvas-shell" p="4">
@@ -85,6 +88,26 @@ function AppShell() {
         </IconButton>
 
         <ShortcutsDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
+
+        {importError !== null ? (
+          <Box className="import-error" role="status" aria-live="polite">
+            <Callout.Root color="red" variant="surface">
+              <Callout.Icon>
+                <AlertTriangle size={16} />
+              </Callout.Icon>
+              <Callout.Text>{importError}</Callout.Text>
+              <IconButton
+                aria-label="Dismiss import error"
+                variant="ghost"
+                color="red"
+                size="1"
+                onClick={dismissError}
+              >
+                <X size={14} />
+              </IconButton>
+            </Callout.Root>
+          </Box>
+        ) : null}
       </Flex>
     </Theme>
   );

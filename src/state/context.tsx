@@ -1,4 +1,10 @@
-import { useMemo, useReducer, useRef, type ReactNode } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  type ReactNode,
+} from 'react';
 import { aliveCount } from '../core/grid';
 import { DEFAULT_SIZE, DEFAULT_SPS, initialState, reducer } from './reducer';
 import {
@@ -27,7 +33,9 @@ export function GameProvider({
   // Kept in sync with the latest committed state so handlers can read on
   // demand without forcing a tick-rate re-render on subscribers.
   const stateRef = useRef(state);
-  stateRef.current = state;
+  useLayoutEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const ui = useMemo(
     () => ({

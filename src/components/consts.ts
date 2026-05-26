@@ -10,6 +10,7 @@ export const DEFAULT_THEME: CanvasTheme = {
 export const SHORTCUTS: readonly Shortcut[] = [
   { keys: ["K"], label: "Play / pause" },
   { keys: ["→"], label: "Step (when paused)" },
+  { keys: ["←"], label: "Undo last step" },
   { keys: ["C"], label: "Clear grid" },
   { keys: ["R"], label: "Randomize grid" },
   { keys: ["]"], label: "Speed up" },

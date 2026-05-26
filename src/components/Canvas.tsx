@@ -13,7 +13,7 @@ export interface CanvasProps {
 
 export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
   const ref = useRef<HTMLCanvasElement | null>(null);
-  const { grid, size, mode, stepsPerSecond } = useGameState();
+  const { grid, size, mode, stepsPerSecond, past, future } = useGameState();
   const dispatch = useGameDispatch();
   const [camera, setCamera] = useCamera(size, { width, height });
 
@@ -26,6 +26,8 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
     size,
     mode,
     stepsPerSecond,
+    canUndo: past.length > 0,
+    canRedo: future.length > 0,
     dispatch,
   });
 

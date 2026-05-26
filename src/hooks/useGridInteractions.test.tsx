@@ -9,9 +9,16 @@ import { useGridInteractions } from './useGridInteractions';
 interface SetupArgs {
   mode?: Mode;
   stepsPerSecond?: number;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
 
-function setup({ mode = 'paused', stepsPerSecond = 10 }: SetupArgs = {}) {
+function setup({
+  mode = 'paused',
+  stepsPerSecond = 10,
+  canUndo = false,
+  canRedo = false,
+}: SetupArgs = {}) {
   const dispatch = vi.fn();
   const setCamera = vi.fn();
   renderHook(() => {
@@ -25,6 +32,8 @@ function setup({ mode = 'paused', stepsPerSecond = 10 }: SetupArgs = {}) {
       dispatch,
       mode,
       stepsPerSecond,
+      canUndo,
+      canRedo,
     });
   });
   return { dispatch, setCamera };
@@ -47,16 +56,40 @@ describe('useGridInteractions keyboard shortcuts', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'PAUSE' });
   });
 
-  it('ArrowRight dispatches STEP when paused', async () => {
+  it('ArrowRight dispatches STEP when paused with no future to redo', async () => {
     const { dispatch } = setup({ mode: 'paused' });
     await userEvent.keyboard('{ArrowRight}');
     expect(dispatch).toHaveBeenCalledWith({ type: 'STEP' });
+  });
+
+  it('ArrowRight dispatches STEP_FORWARD when future is non-empty', async () => {
+    const { dispatch } = setup({ mode: 'paused', canRedo: true });
+    await userEvent.keyboard('{ArrowRight}');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'STEP_FORWARD' });
   });
 
   it('ArrowRight is ignored while playing', async () => {
     const { dispatch } = setup({ mode: 'playing' });
     await userEvent.keyboard('{ArrowRight}');
     expect(dispatch).not.toHaveBeenCalledWith({ type: 'STEP' });
+  });
+
+  it('ArrowLeft dispatches STEP_BACK when past is non-empty and paused', async () => {
+    const { dispatch } = setup({ mode: 'paused', canUndo: true });
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(dispatch).toHaveBeenCalledWith({ type: 'STEP_BACK' });
+  });
+
+  it('ArrowLeft is a no-op when past is empty', async () => {
+    const { dispatch } = setup({ mode: 'paused', canUndo: false });
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('ArrowLeft is a no-op while playing', async () => {
+    const { dispatch } = setup({ mode: 'playing', canUndo: true });
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('C dispatches CLEAR', async () => {

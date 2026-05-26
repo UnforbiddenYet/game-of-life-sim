@@ -19,12 +19,21 @@ export interface CanvasProps {
 
 export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
   const ref = useRef<HTMLCanvasElement | null>(null);
-  const { grid, size } = useGameState();
+  const { grid, size, mode, stepsPerSecond } = useGameState();
   const dispatch = useGameDispatch();
   const [camera, setCamera] = useCamera(size, { width, height });
 
   useCanvasDraw({ ref, grid, camera, width, height, theme });
-  useGridInteractions({ ref, camera, setCamera, grid, size, dispatch });
+  useGridInteractions({
+    ref,
+    camera,
+    setCamera,
+    grid,
+    size,
+    mode,
+    stepsPerSecond,
+    dispatch,
+  });
 
   return (
     <canvas ref={ref} style={{ width, height, touchAction: 'none' }} />

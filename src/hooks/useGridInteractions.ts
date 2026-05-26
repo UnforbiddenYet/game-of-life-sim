@@ -4,11 +4,12 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { panCamera, screenToCell, zoomCamera } from '../core/camera';
 import { getCell, inBounds } from '../core/grid';
 import * as Actions from '../state/actions';
-import type { Action } from '../types/game';
+import type { Action, Mode } from '../types/game';
 import type { Camera } from '../types/camera';
 import type { Grid } from '../types/grid';
 
 const WHEEL_ZOOM_SENSITIVITY = 0.001;
+const RANDOMIZE_DENSITY = 0.3;
 
 interface Stroke {
   readonly paintValue: 0 | 1;
@@ -26,21 +27,19 @@ interface Args {
   setCamera: Dispatch<SetStateAction<Camera>>;
   grid: Grid;
   size: number;
+  mode: Mode;
+  stepsPerSecond: number;
   dispatch: Dispatch<Action>;
 }
 
-/**
- * Single home for every user input on the grid canvas:
- *  - drag-paint with paint-mode (down on dead → paint, down on alive → erase)
- *  - wheel-zoom toward the cursor
- * Returns a bind() to spread onto the canvas element.
- */
 export function useGridInteractions({
   ref,
   camera,
   setCamera,
   grid,
   size,
+  mode,
+  stepsPerSecond,
   dispatch,
 }: Args) {
   const stroke = useRef<Stroke | null>(null);
@@ -52,7 +51,36 @@ export function useGridInteractions({
       e.preventDefault();
       spacePressed.current = e.type === 'keydown';
     },
-    { keydown: true, keyup: true }
+    { keydown: true, keyup: true },
+  );
+
+  useHotkeys(
+    'k',
+    () => dispatch(mode === 'playing' ? Actions.pause() : Actions.play()),
+    [mode],
+  );
+
+  useHotkeys(
+    'right',
+    () => {
+      if (mode === 'playing') return;
+      dispatch(Actions.step());
+    },
+    [mode],
+  );
+
+  useHotkeys('c', () => dispatch(Actions.clear()));
+  useHotkeys('r', () => dispatch(Actions.randomize(RANDOMIZE_DENSITY)));
+
+  useHotkeys(
+    'bracketright',
+    () => dispatch(Actions.setSpeed(stepsPerSecond + 1)),
+    [stepsPerSecond],
+  );
+  useHotkeys(
+    'bracketleft',
+    () => dispatch(Actions.setSpeed(stepsPerSecond - 1)),
+    [stepsPerSecond],
   );
 
   const cursorOf = (event: CursorEvent) => {

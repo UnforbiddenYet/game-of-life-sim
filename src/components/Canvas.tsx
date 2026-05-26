@@ -1,13 +1,12 @@
 import {
-  useEffect,
   useRef,
   type PointerEvent as ReactPointerEvent,
   type WheelEvent as ReactWheelEvent,
 } from 'react';
-import { drawGrid } from '../canvas/drawGrid';
 import { screenToCell, zoomCamera } from '../core/camera';
 import { getCell, inBounds } from '../core/grid';
 import { useCamera } from '../hooks/useCamera';
+import { useCanvasDraw } from '../hooks/useCanvasDraw';
 import * as Actions from '../state/actions';
 import { useGameDispatch, useGameState } from '../state/hooks';
 import type { CanvasTheme } from '../types/canvas';
@@ -39,19 +38,7 @@ export function Canvas({ width, height, theme = DEFAULT_THEME }: CanvasProps) {
   const { grid, size } = useGameState();
   const [camera, setCamera] = useCamera(size, { width, height });
 
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    // Size the drawing buffer at the screen's actual pixel density so retina
-    // displays render at native resolution. CSS size stays at width × height
-    // so layout, pointer coords, and the camera all work in CSS pixels.
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    drawGrid(ctx, grid, camera, { width, height }, theme, dpr);
-  }, [grid, camera, width, height, theme]);
+  useCanvasDraw({ ref, grid, camera, width, height, theme });
 
   const cursorOf = (e: { clientX: number; clientY: number }) => {
     const canvas = ref.current;

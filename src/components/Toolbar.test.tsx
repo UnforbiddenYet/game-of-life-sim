@@ -1,22 +1,37 @@
-import userEvent from "@testing-library/user-event";
-import { Theme } from "@radix-ui/themes";
-import type { ComponentProps } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { Toolbar } from "./Toolbar";
+import { Theme } from '@radix-ui/themes';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { ComponentProps, ReactNode } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { TickContext } from '../state/hooks';
+import { Toolbar } from './Toolbar';
 
 afterEach(() => {
   cleanup();
 });
 
+function TickHarness({
+  generation,
+  alive,
+  children,
+}: {
+  generation: number;
+  alive: number;
+  children: ReactNode;
+}) {
+  return (
+    <TickContext.Provider value={{ generation, alive }}>
+      <Theme>{children}</Theme>
+    </TickContext.Provider>
+  );
+}
+
 function renderToolbar(
   overrides: Partial<ComponentProps<typeof Toolbar>> = {},
+  tick: { generation: number; alive: number } = { generation: 12, alive: 34 },
 ) {
   const props: ComponentProps<typeof Toolbar> = {
-    mode: "paused",
-    generation: 12,
-    alive: 34,
-    size: 50,
+    mode: 'paused',
     stepsPerSecond: 10,
     onTogglePlayPause: vi.fn(),
     onStep: vi.fn(),
@@ -28,42 +43,42 @@ function renderToolbar(
   };
 
   render(
-    <Theme>
+    <TickHarness generation={tick.generation} alive={tick.alive}>
       <Toolbar {...props} />
-    </Theme>,
+    </TickHarness>,
   );
   return props;
 }
 
-describe("Toolbar", () => {
-  it("surfaces the main controls and simulation stats", () => {
+describe('Toolbar', () => {
+  it('surfaces the main controls and simulation stats', () => {
     renderToolbar();
     const statsContainer = screen.getByLabelText(/simulation statistics/i);
-    const toolbarMeta = screen.getByText(/simulation speed/i).closest("label");
+    const toolbarMeta = screen.getByText(/simulation speed/i).closest('label');
 
     expect(
-      screen.getByRole("button", { name: /play simulation/i }),
+      screen.getByRole('button', { name: /play simulation/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /step simulation/i }),
+      screen.getByRole('button', { name: /step simulation/i }),
     ).toBeInTheDocument();
     expect(statsContainer).toHaveTextContent(/generation\s*12/i);
     expect(statsContainer).toHaveTextContent(/alive\s*34/i);
     expect(toolbarMeta).toHaveTextContent(/speed\s*10\s*sps/i);
   });
 
-  it("dispatches control callbacks from buttons and the speed slider", async () => {
+  it('dispatches control callbacks from buttons and the speed slider', async () => {
     const props = renderToolbar({ stepsPerSecond: 17 });
     const user = userEvent.setup();
 
-    fireEvent.click(screen.getByRole("button", { name: /play simulation/i }));
-    fireEvent.click(screen.getByRole("button", { name: /step simulation/i }));
-    fireEvent.click(screen.getByRole("button", { name: /randomize grid/i }));
-    fireEvent.click(screen.getByRole("button", { name: /clear grid/i }));
-    fireEvent.click(screen.getByRole("button", { name: /new game/i }));
-    const slider = screen.getByRole("slider");
+    fireEvent.click(screen.getByRole('button', { name: /play simulation/i }));
+    fireEvent.click(screen.getByRole('button', { name: /step simulation/i }));
+    fireEvent.click(screen.getByRole('button', { name: /randomize grid/i }));
+    fireEvent.click(screen.getByRole('button', { name: /clear grid/i }));
+    fireEvent.click(screen.getByRole('button', { name: /new game/i }));
+    const slider = screen.getByRole('slider');
     slider.focus();
-    await user.keyboard("{ArrowRight}");
+    await user.keyboard('{ArrowRight}');
 
     expect(props.onTogglePlayPause).toHaveBeenCalledTimes(1);
     expect(props.onStep).toHaveBeenCalledTimes(1);

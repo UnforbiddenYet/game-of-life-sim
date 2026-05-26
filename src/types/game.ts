@@ -10,6 +10,17 @@ export interface GameState {
   readonly stepsPerSecond: number;
 }
 
+export interface GameUi {
+  readonly size: number;
+  readonly mode: Mode;
+  readonly stepsPerSecond: number;
+}
+
+export interface GameTick {
+  readonly generation: number;
+  readonly alive: number;
+}
+
 export type Action =
   | { type: 'STEP' }
   | { type: 'PLAY' }

@@ -1,11 +1,8 @@
-import { Badge, Flex } from "@radix-ui/themes";
+import { Badge, Flex } from '@radix-ui/themes';
+import { useGameTick } from '../state/hooks';
 
-interface StatsProps {
-  generation: number;
-  alive: number;
-}
-
-export function Stats({ generation, alive }: StatsProps) {
+export function Stats() {
+  const { generation, alive } = useGameTick();
   return (
     <Flex aria-label="Simulation statistics" gap="2" wrap="wrap">
       <Badge className="toolbar-stat" color="gray" variant="soft" radius="full">

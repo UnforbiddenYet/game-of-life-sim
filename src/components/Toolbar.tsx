@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Flex, Slider, Text } from "@radix-ui/themes";
+import { Badge, Box, Button, Flex, Slider, Text } from '@radix-ui/themes';
 import {
   Eraser,
   Pause,
@@ -6,14 +6,12 @@ import {
   Shuffle,
   SkipForward,
   SquarePen,
-} from "lucide-react";
-import { Stats } from "./Stats";
+} from 'lucide-react';
+import type { Mode } from '../types/game';
+import { Stats } from './Stats';
 
 export interface ToolbarProps {
-  mode: "paused" | "playing";
-  generation: number;
-  alive: number;
-  size: number;
+  mode: Mode;
   stepsPerSecond: number;
   onTogglePlayPause: () => void;
   onStep: () => void;
@@ -25,9 +23,6 @@ export interface ToolbarProps {
 
 export function Toolbar({
   mode,
-  generation,
-  alive,
-  size,
   stepsPerSecond,
   onTogglePlayPause,
   onStep,
@@ -36,7 +31,7 @@ export function Toolbar({
   onOpenNewGame,
   onSetSpeed,
 }: ToolbarProps) {
-  const isPlaying = mode === "playing";
+  const isPlaying = mode === 'playing';
 
   return (
     <Box asChild className="toolbar-surface" px="4" py="3">
@@ -55,13 +50,13 @@ export function Toolbar({
             <Flex aria-label="Simulation controls" gap="2" wrap="wrap">
               <Button
                 type="button"
-                aria-label={isPlaying ? "Pause simulation" : "Play simulation"}
+                aria-label={isPlaying ? 'Pause simulation' : 'Play simulation'}
                 onClick={onTogglePlayPause}
                 variant="solid"
                 className="toolbar-button"
               >
                 {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                <span>{isPlaying ? "Pause" : "Play"}</span>
+                <span>{isPlaying ? 'Pause' : 'Play'}</span>
               </Button>
 
               <Button
@@ -151,7 +146,7 @@ export function Toolbar({
               </label>
             </Flex>
 
-            <Stats generation={generation} alive={alive} />
+            <Stats />
           </Flex>
         </Flex>
       </header>

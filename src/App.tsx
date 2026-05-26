@@ -1,17 +1,16 @@
-import { Box, Flex, Theme } from "@radix-ui/themes";
-import { useRef, useState } from "react";
-import { aliveCount } from "./core/grid";
-import { Canvas } from "./components/Canvas";
-import { SizeDialog } from "./components/SizeDialog";
-import { Toolbar } from "./components/Toolbar";
-import { useElementSize } from "./hooks/useElementSize";
-import { useGameLoop } from "./hooks/useGameLoop";
-import * as Actions from "./state/actions";
-import { GameProvider } from "./state/context";
-import { useGameDispatch, useGameState } from "./state/hooks";
+import { Box, Flex, Theme } from '@radix-ui/themes';
+import { useRef, useState } from 'react';
+import { Canvas } from './components/Canvas';
+import { SizeDialog } from './components/SizeDialog';
+import { Toolbar } from './components/Toolbar';
+import { useElementSize } from './hooks/useElementSize';
+import { useGameLoop } from './hooks/useGameLoop';
+import * as Actions from './state/actions';
+import { GameProvider } from './state/context';
+import { useGameDispatch, useGameUi } from './state/hooks';
 
-import "@radix-ui/themes/styles.css";
-import "./styles/styles.css";
+import '@radix-ui/themes/styles.css';
+import './styles/styles.css';
 
 export default function App() {
   return (
@@ -25,13 +24,12 @@ function AppShell() {
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const { width, height } = useElementSize(canvasContainerRef);
   const [isSizeDialogOpen, setIsSizeDialogOpen] = useState(false);
-  const state = useGameState();
+  const { mode, size, stepsPerSecond } = useGameUi();
   const dispatch = useGameDispatch();
-  const alive = aliveCount(state.grid);
 
   useGameLoop({
-    isPlaying: state.mode === "playing",
-    stepsPerSecond: state.stepsPerSecond,
+    isPlaying: mode === 'playing',
+    stepsPerSecond,
     onTick: () => dispatch(Actions.step()),
   });
 
@@ -39,23 +37,18 @@ function AppShell() {
     <Theme appearance="dark" accentColor="gray" radius="large">
       <Flex className="app-shell" direction="column">
         <Toolbar
-          mode={state.mode}
-          generation={state.generation}
-          alive={alive}
-          size={state.size}
-          stepsPerSecond={state.stepsPerSecond}
+          mode={mode}
+          stepsPerSecond={stepsPerSecond}
           onTogglePlayPause={() =>
             dispatch(
-              state.mode === "playing" ? Actions.pause() : Actions.play(),
+              mode === 'playing' ? Actions.pause() : Actions.play(),
             )
           }
           onStep={() => dispatch(Actions.step())}
           onClear={() => dispatch(Actions.clear())}
           onRandomize={() => dispatch(Actions.randomize(0.3))}
           onOpenNewGame={() => setIsSizeDialogOpen(true)}
-          onSetSpeed={(stepsPerSecond) =>
-            dispatch(Actions.setSpeed(stepsPerSecond))
-          }
+          onSetSpeed={(sps) => dispatch(Actions.setSpeed(sps))}
         />
 
         <Box asChild className="canvas-shell" p="4">
@@ -68,10 +61,10 @@ function AppShell() {
 
         <SizeDialog
           open={isSizeDialogOpen}
-          currentSize={state.size}
+          currentSize={size}
           onOpenChange={setIsSizeDialogOpen}
-          onSubmit={(size) => {
-            dispatch(Actions.newGame(size));
+          onSubmit={(nextSize) => {
+            dispatch(Actions.newGame(nextSize));
             setIsSizeDialogOpen(false);
           }}
         />

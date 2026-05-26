@@ -71,11 +71,13 @@
   transform: translateX(-50%);
   max-width: min(560px, calc(100vw - 48px));
   z-index: 50;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 
 .import-error .rt-CalloutRoot {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  background: var(--red-3);
+  border: 1px solid var(--red-7);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }

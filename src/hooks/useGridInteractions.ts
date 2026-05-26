@@ -1,6 +1,7 @@
 import { useGesture } from '@use-gesture/react';
 import { useRef, type Dispatch, type RefObject, type SetStateAction } from 'react';
-import { screenToCell, zoomCamera } from '../core/camera';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { panCamera, screenToCell, zoomCamera } from '../core/camera';
 import { getCell, inBounds } from '../core/grid';
 import * as Actions from '../state/actions';
 import type { Action } from '../types/game';
@@ -43,6 +44,16 @@ export function useGridInteractions({
   dispatch,
 }: Args) {
   const stroke = useRef<Stroke | null>(null);
+  const spacePressed = useRef(false);
+
+  useHotkeys(
+    'space',
+    (e) => {
+      e.preventDefault();
+      spacePressed.current = e.type === 'keydown';
+    },
+    { keydown: true, keyup: true }
+  );
 
   const cursorOf = (event: CursorEvent) => {
     const canvas = ref.current;
@@ -53,9 +64,13 @@ export function useGridInteractions({
 
   useGesture(
     {
-      onDrag: ({ event, first, last }) => {
+      onDrag: ({ event, delta: [dx, dy], first, last }) => {
         if (last) {
           stroke.current = null;
+          return;
+        }
+        if (spacePressed.current) {
+          setCamera((c) => panCamera(c, dx / c.z, dy / c.z));
           return;
         }
         const cursor = cursorOf(event as CursorEvent);

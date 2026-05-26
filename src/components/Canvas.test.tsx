@@ -113,6 +113,22 @@ describe('Canvas', () => {
     expect(aliveFillsOn(ctx)).toBeGreaterThan(1);
   });
 
+  it('pans without painting when the drag is held with Space', async () => {
+    const user = userEvent.setup();
+    const { canvas, ctx } = setup();
+    ctx.__clearEvents();
+
+    await user.keyboard('[Space>]'); // hold Space
+    await user.pointer([
+      { keys: '[MouseLeft>]', target: canvas, coords: { clientX: 5, clientY: 25 } },
+      { target: canvas, coords: { clientX: 35, clientY: 25 } },
+      { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 35, clientY: 25 } },
+    ]);
+    await user.keyboard('[/Space]'); // release Space
+
+    expect(aliveFillsOn(ctx)).toBe(0);
+  });
+
   it('erases along the drag path when the drag starts on an alive cell', async () => {
     const user = userEvent.setup();
     const { canvas, ctx } = setup();

@@ -1,6 +1,10 @@
-import type { Action, GameState } from '../types/game';
+import type { Action, GameState, HistoryFrame } from '../types/game';
 import { cloneGrid, createGrid, randomGrid, setCell } from '../core/grid';
 import { step } from '../core/step';
+
+function snapshot(state: GameState): HistoryFrame {
+  return { grid: cloneGrid(state.grid), generation: state.generation };
+}
 
 export const DEFAULT_SIZE = 50;
 export const DEFAULT_SPS = 10;
@@ -20,6 +24,8 @@ export function initialState(
     generation: 0,
     mode: 'paused',
     stepsPerSecond,
+    past: [],
+    future: [],
   };
 }
 
@@ -30,6 +36,7 @@ export function reducer(state: GameState, action: Action): GameState {
         ...state,
         grid: step(state.grid),
         generation: state.generation + 1,
+        past: [...state.past, snapshot(state)],
       };
     case 'PLAY':
       return state.mode === 'playing' ? state : { ...state, mode: 'playing' };

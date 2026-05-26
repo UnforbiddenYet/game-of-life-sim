@@ -15,6 +15,25 @@ describe("initialState", () => {
 });
 
 describe("reducer", () => {
+  it("starts with empty history stacks", () => {
+    const s = initialState(5);
+    expect(s.past).toEqual([]);
+    expect(s.future).toEqual([]);
+  });
+
+  it("STEP pushes the prior frame onto past", () => {
+    const s0 = initialState(5);
+    setCell(s0.grid, 2, 1, 1);
+    setCell(s0.grid, 2, 2, 1);
+    setCell(s0.grid, 2, 3, 1);
+
+    const s1 = reducer(s0, Actions.step());
+
+    expect(s1.past).toHaveLength(1);
+    expect(s1.past[0]?.generation).toBe(0);
+    expect(s1.past[0]?.grid.cells).toEqual(s0.grid.cells);
+  });
+
   it("STEP advances one generation and rewrites the grid", () => {
     const s0 = initialState(5);
     // vertical blinker

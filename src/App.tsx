@@ -1,6 +1,8 @@
-import { Box, Flex, Theme } from '@radix-ui/themes';
+import { Box, Flex, IconButton, Theme } from '@radix-ui/themes';
+import { HelpCircle } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Canvas } from './components/Canvas';
+import { ShortcutsDialog } from './components/ShortcutsDialog';
 import { SizeDialog } from './components/SizeDialog';
 import { Toolbar } from './components/Toolbar';
 import { useElementSize } from './hooks/useElementSize';
@@ -24,6 +26,7 @@ function AppShell() {
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const { width, height } = useElementSize(canvasContainerRef);
   const [isSizeDialogOpen, setIsSizeDialogOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { mode, size, stepsPerSecond } = useGameUi();
   const dispatch = useGameDispatch();
 
@@ -68,6 +71,20 @@ function AppShell() {
             setIsSizeDialogOpen(false);
           }}
         />
+
+        <IconButton
+          className="help-fab"
+          aria-label="Show keyboard shortcuts"
+          variant="soft"
+          color="gray"
+          radius="full"
+          size="3"
+          onClick={() => setIsHelpOpen(true)}
+        >
+          <HelpCircle size={18} />
+        </IconButton>
+
+        <ShortcutsDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
       </Flex>
     </Theme>
   );

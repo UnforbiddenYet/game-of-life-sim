@@ -37,7 +37,30 @@ export function reducer(state: GameState, action: Action): GameState {
         grid: step(state.grid),
         generation: state.generation + 1,
         past: [...state.past, snapshot(state)],
+        future: [],
       };
+    case 'STEP_BACK': {
+      if (state.past.length === 0) return state;
+      const prev = state.past[state.past.length - 1] as HistoryFrame;
+      return {
+        ...state,
+        grid: cloneGrid(prev.grid),
+        generation: prev.generation,
+        past: state.past.slice(0, -1),
+        future: [...state.future, snapshot(state)],
+      };
+    }
+    case 'STEP_FORWARD': {
+      if (state.future.length === 0) return state;
+      const next = state.future[state.future.length - 1] as HistoryFrame;
+      return {
+        ...state,
+        grid: cloneGrid(next.grid),
+        generation: next.generation,
+        past: [...state.past, snapshot(state)],
+        future: state.future.slice(0, -1),
+      };
+    }
     case 'PLAY':
       return state.mode === 'playing' ? state : { ...state, mode: 'playing' };
     case 'PAUSE':

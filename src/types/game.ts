@@ -31,6 +31,8 @@ export interface GameTick {
 
 export type Action =
   | { type: 'STEP' }
+  | { type: 'STEP_BACK' }
+  | { type: 'STEP_FORWARD' }
   | { type: 'PLAY' }
   | { type: 'PAUSE' }
   | { type: 'SET_CELL'; x: number; y: number; alive: 0 | 1 }

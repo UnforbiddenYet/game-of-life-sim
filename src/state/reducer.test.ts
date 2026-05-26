@@ -51,6 +51,51 @@ describe("reducer", () => {
     expect(aliveCount(s1.grid)).toBe(3);
   });
 
+  it("STEP_BACK on empty past is a no-op", () => {
+    const s0 = initialState(5);
+    const s1 = reducer(s0, Actions.stepBack());
+    expect(s1).toBe(s0);
+  });
+
+  it("STEP_BACK after STEP restores the prior grid and generation", () => {
+    let s = initialState(5);
+    setCell(s.grid, 2, 1, 1);
+    setCell(s.grid, 2, 2, 1);
+    setCell(s.grid, 2, 3, 1);
+    const before = new Uint8Array(s.grid.cells);
+
+    s = reducer(s, Actions.step());
+    s = reducer(s, Actions.stepBack());
+
+    expect(s.generation).toBe(0);
+    expect(s.grid.cells).toEqual(before);
+    expect(s.past).toHaveLength(0);
+    expect(s.future).toHaveLength(1);
+  });
+
+  it("STEP then STEP_BACK then STEP_FORWARD round-trips byte-identical", () => {
+    let s = initialState(5);
+    setCell(s.grid, 2, 1, 1);
+    setCell(s.grid, 2, 2, 1);
+    setCell(s.grid, 2, 3, 1);
+    s = reducer(s, Actions.step());
+    const afterStep = new Uint8Array(s.grid.cells);
+    const afterGen = s.generation;
+
+    s = reducer(s, Actions.stepBack());
+    s = reducer(s, Actions.stepForward());
+
+    expect(s.generation).toBe(afterGen);
+    expect(s.grid.cells).toEqual(afterStep);
+    expect(s.future).toHaveLength(0);
+  });
+
+  it("STEP_FORWARD on empty future is a no-op", () => {
+    const s0 = initialState(5);
+    const s1 = reducer(s0, Actions.stepForward());
+    expect(s1).toBe(s0);
+  });
+
   it("PLAY transitions mode to playing", () => {
     const s = reducer(initialState(5), Actions.play());
     expect(s.mode).toBe("playing");

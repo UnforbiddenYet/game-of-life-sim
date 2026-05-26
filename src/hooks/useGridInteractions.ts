@@ -121,6 +121,7 @@ export function useGridInteractions({
         if (first) {
           const paintValue: 0 | 1 = getCell(grid, cell.x, cell.y) === 1 ? 0 : 1;
           stroke.current = { paintValue, touched: new Set([idx]) };
+          dispatch(Actions.checkpoint());
           dispatch(Actions.setCell(cell.x, cell.y, paintValue));
           return;
         }

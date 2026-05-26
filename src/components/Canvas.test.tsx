@@ -129,6 +129,26 @@ describe('Canvas', () => {
     expect(aliveFillsOn(ctx)).toBe(0);
   });
 
+  it('undoes a whole drag stroke in one keypress, not cell-by-cell', async () => {
+    const user = userEvent.setup();
+    const { canvas, ctx } = setup();
+
+    await user.pointer([
+      { keys: '[MouseLeft>]', target: canvas, coords: { clientX: 5, clientY: 25 } },
+      { target: canvas, coords: { clientX: 15, clientY: 25 } },
+      { target: canvas, coords: { clientX: 25, clientY: 25 } },
+      { target: canvas, coords: { clientX: 35, clientY: 25 } },
+      { target: canvas, coords: { clientX: 45, clientY: 25 } },
+      { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 45, clientY: 25 } },
+    ]);
+    expect(aliveFillsOn(ctx)).toBeGreaterThan(1);
+    ctx.__clearEvents();
+
+    await user.keyboard('{ArrowLeft}');
+
+    expect(aliveFillsOn(ctx)).toBe(0);
+  });
+
   it('erases along the drag path when the drag starts on an alive cell', async () => {
     const user = userEvent.setup();
     const { canvas, ctx } = setup();

@@ -38,6 +38,11 @@ export function reducer(state: GameState, action: Action): GameState {
         generation: state.generation + 1,
         past: pushBounded(state.past, snapshot(state), state.size),
       };
+    case 'CHECKPOINT':
+      return {
+        ...state,
+        past: pushBounded(state.past, snapshot(state), state.size),
+      };
     case 'UNDO': {
       if (state.past.length === 0) return state;
       const prev = state.past[state.past.length - 1] as HistoryFrame;

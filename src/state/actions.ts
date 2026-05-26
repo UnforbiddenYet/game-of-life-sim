@@ -3,6 +3,7 @@ import type { GameSnapshot } from '../types/serialize';
 
 export const step = (): Action => ({ type: 'STEP' });
 export const undo = (): Action => ({ type: 'UNDO' });
+export const checkpoint = (): Action => ({ type: 'CHECKPOINT' });
 export const play = (): Action => ({ type: 'PLAY' });
 export const pause = (): Action => ({ type: 'PAUSE' });
 export const setCell = (x: number, y: number, alive: 0 | 1): Action => ({

@@ -97,6 +97,31 @@ describe("reducer", () => {
     expect(s.past).toHaveLength(pastLen);
   });
 
+  it("CHECKPOINT pushes the current frame onto past", () => {
+    const s0 = initialState(5);
+    setCell(s0.grid, 1, 1, 1);
+    const s1 = reducer(s0, Actions.checkpoint());
+
+    expect(s1.past).toHaveLength(1);
+    expect(s1.past[0]?.grid.cells).toEqual(s0.grid.cells);
+    expect(s1.grid.cells).toEqual(s0.grid.cells);
+  });
+
+  it("CHECKPOINT then SET_CELLs then UNDO restores the pre-edit grid", () => {
+    let s = initialState(5);
+    const before = new Uint8Array(s.grid.cells);
+
+    s = reducer(s, Actions.checkpoint());
+    s = reducer(s, Actions.setCell(1, 1, 1));
+    s = reducer(s, Actions.setCell(2, 2, 1));
+    s = reducer(s, Actions.setCell(3, 3, 1));
+    expect(s.past).toHaveLength(1);
+
+    s = reducer(s, Actions.undo());
+    expect(s.grid.cells).toEqual(before);
+    expect(s.past).toHaveLength(0);
+  });
+
   it("CLEAR clears history", () => {
     let s = initialState(5);
     s = reducer(s, Actions.step());

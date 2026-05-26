@@ -28,7 +28,7 @@ function AppShell() {
   const { width, height } = useElementSize(canvasContainerRef);
   const [isSizeDialogOpen, setIsSizeDialogOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const { mode, size, stepsPerSecond } = useGameUi();
+  const { mode, size, stepsPerSecond, canUndo } = useGameUi();
   const dispatch = useGameDispatch();
   const { exportGame, importGame, importError, dismissError } =
     useImportExport();
@@ -45,10 +45,12 @@ function AppShell() {
         <Toolbar
           mode={mode}
           stepsPerSecond={stepsPerSecond}
+          canUndo={canUndo}
           onTogglePlayPause={() =>
             dispatch(mode === "playing" ? Actions.pause() : Actions.play())
           }
           onStep={() => dispatch(Actions.step())}
+          onUndo={() => dispatch(Actions.undo())}
           onClear={() => dispatch(Actions.clear())}
           onRandomize={() => dispatch(Actions.randomize(0.3))}
           onOpenNewGame={() => setIsSizeDialogOpen(true)}

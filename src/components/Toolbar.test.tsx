@@ -41,6 +41,8 @@ function renderToolbar(
     onSetSpeed: vi.fn(),
     onExport: vi.fn(),
     onImport: vi.fn(),
+    onUndo: vi.fn(),
+    canUndo: false,
     ...overrides,
   };
 
@@ -88,6 +90,17 @@ describe('Toolbar', () => {
     expect(props.onClear).toHaveBeenCalledTimes(1);
     expect(props.onOpenNewGame).toHaveBeenCalledTimes(1);
     expect(props.onSetSpeed).toHaveBeenCalledWith(18);
+  });
+
+  it('Undo button is disabled when canUndo is false', () => {
+    renderToolbar({ canUndo: false });
+    expect(screen.getByRole('button', { name: /undo/i })).toBeDisabled();
+  });
+
+  it('Undo button dispatches onUndo when enabled', () => {
+    const props = renderToolbar({ canUndo: true });
+    fireEvent.click(screen.getByRole('button', { name: /undo/i }));
+    expect(props.onUndo).toHaveBeenCalledTimes(1);
   });
 
   it('Export button triggers onExport', () => {

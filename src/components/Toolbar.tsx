@@ -7,6 +7,7 @@ import {
   Shuffle,
   SkipForward,
   SquarePen,
+  Undo2,
   Upload,
 } from 'lucide-react';
 import { useRef } from 'react';
@@ -16,8 +17,10 @@ import { Stats } from './Stats';
 export interface ToolbarProps {
   mode: Mode;
   stepsPerSecond: number;
+  canUndo: boolean;
   onTogglePlayPause: () => void;
   onStep: () => void;
+  onUndo: () => void;
   onClear: () => void;
   onRandomize: () => void;
   onOpenNewGame: () => void;
@@ -29,8 +32,10 @@ export interface ToolbarProps {
 export function Toolbar({
   mode,
   stepsPerSecond,
+  canUndo,
   onTogglePlayPause,
   onStep,
+  onUndo,
   onClear,
   onRandomize,
   onOpenNewGame,
@@ -65,6 +70,19 @@ export function Toolbar({
               >
                 {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                 <span>{isPlaying ? 'Pause' : 'Play'}</span>
+              </Button>
+
+              <Button
+                type="button"
+                aria-label="Undo last step"
+                onClick={onUndo}
+                disabled={isPlaying || !canUndo}
+                variant="soft"
+                color="gray"
+                className="toolbar-button"
+              >
+                <Undo2 size={16} />
+                <span>Undo</span>
               </Button>
 
               <Button

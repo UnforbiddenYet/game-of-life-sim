@@ -1,4 +1,5 @@
 import type { Action } from '../types/game';
+import type { GameSnapshot } from '../types/serialize';
 
 export const step = (): Action => ({ type: 'STEP' });
 export const play = (): Action => ({ type: 'PLAY' });
@@ -19,3 +20,7 @@ export const setSpeed = (stepsPerSecond: number): Action => ({
   stepsPerSecond,
 });
 export const newGame = (size: number): Action => ({ type: 'NEW_GAME', size });
+export const importSnapshot = (snapshot: GameSnapshot): Action => ({
+  type: 'IMPORT',
+  snapshot,
+});

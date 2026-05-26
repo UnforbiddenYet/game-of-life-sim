@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aliveCount, getCell, setCell } from "../core/grid";
+import { aliveCount, createGrid, getCell, setCell } from "../core/grid";
 import * as Actions from "./actions";
 import { initialState, reducer } from "./reducer";
 
@@ -77,6 +77,40 @@ describe("reducer", () => {
     expect(reducer(s0, Actions.setSpeed(25)).stepsPerSecond).toBe(25);
     expect(reducer(s0, Actions.setSpeed(0)).stepsPerSecond).toBe(1);
     expect(reducer(s0, Actions.setSpeed(999)).stepsPerSecond).toBe(60);
+  });
+
+  it("IMPORT replaces grid, size, generation; pauses; preserves speed", () => {
+    let s = initialState(5);
+    s = reducer(s, Actions.setSpeed(20));
+    s = reducer(s, Actions.play());
+
+    const snapshotGrid = createGrid(8);
+    setCell(snapshotGrid, 1, 1, 1);
+    setCell(snapshotGrid, 7, 7, 1);
+    const next = reducer(
+      s,
+      Actions.importSnapshot({ size: 8, generation: 42, grid: snapshotGrid }),
+    );
+
+    expect(next.size).toBe(8);
+    expect(next.grid.size).toBe(8);
+    expect(next.generation).toBe(42);
+    expect(next.mode).toBe("paused");
+    expect(next.stepsPerSecond).toBe(20);
+    expect(getCell(next.grid, 1, 1)).toBe(1);
+    expect(getCell(next.grid, 7, 7)).toBe(1);
+    expect(aliveCount(next.grid)).toBe(2);
+  });
+
+  it("IMPORT does not mutate the prior state's grid", () => {
+    const s = initialState(5);
+    setCell(s.grid, 2, 2, 1);
+    const before = new Uint8Array(s.grid.cells);
+
+    const snapshotGrid = createGrid(5);
+    reducer(s, Actions.importSnapshot({ size: 5, generation: 0, grid: snapshotGrid }));
+
+    expect(s.grid.cells).toEqual(before);
   });
 
   it("NEW_GAME resets to a fresh paused state at the new size and preserves speed", () => {

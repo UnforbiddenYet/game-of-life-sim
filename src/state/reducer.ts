@@ -52,5 +52,15 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, stepsPerSecond: clampSps(action.stepsPerSecond) };
     case 'NEW_GAME':
       return initialState(action.size, state.stepsPerSecond);
+    case 'IMPORT': {
+      const { snapshot } = action;
+      return {
+        ...state,
+        size: snapshot.size,
+        grid: cloneGrid(snapshot.grid),
+        generation: snapshot.generation,
+        mode: 'paused',
+      };
+    }
   }
 }

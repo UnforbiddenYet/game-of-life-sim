@@ -1,4 +1,5 @@
 import type { Grid } from './grid';
+import type { GameSnapshot } from './serialize';
 
 export type Mode = 'paused' | 'playing';
 
@@ -29,4 +30,5 @@ export type Action =
   | { type: 'CLEAR' }
   | { type: 'RANDOMIZE'; density: number }
   | { type: 'SET_SPEED'; stepsPerSecond: number }
-  | { type: 'NEW_GAME'; size: number };
+  | { type: 'NEW_GAME'; size: number }
+  | { type: 'IMPORT'; snapshot: GameSnapshot };

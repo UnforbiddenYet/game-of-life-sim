@@ -1,4 +1,5 @@
 import { fireEvent, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { GameProvider } from '../state/context';
 import { Canvas } from './Canvas';
@@ -21,7 +22,8 @@ function setup(size = 5, width = 50, height = 50) {
   );
   const canvas = result.container.querySelector('canvas');
   if (!canvas) throw new Error('canvas not rendered');
-  // jsdom does not compute layout; pin the canvas box so client coords work
+  // jsdom defaults all layout sizes to 0 — pin the canvas box so @use-gesture
+  // can compute displacements and our pointer math sees CSS pixels.
   canvas.getBoundingClientRect = () => ({
     left: 0,
     top: 0,
@@ -81,27 +83,62 @@ describe('Canvas', () => {
     });
   });
 
-  it('paints one cell on press+release over an empty grid', () => {
+  it('paints one cell on press+release over an empty grid', async () => {
+    const user = userEvent.setup();
     const { canvas, ctx } = setup();
     ctx.__clearEvents();
 
-    fireEvent.pointerDown(canvas, { clientX: 25, clientY: 25, pointerId: 1 });
-    fireEvent.pointerUp(canvas, { clientX: 25, clientY: 25, pointerId: 1 });
+    await user.pointer([
+      { keys: '[MouseLeft>]', target: canvas, coords: { clientX: 25, clientY: 25 } },
+      { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 25, clientY: 25 } },
+    ]);
 
     expect(aliveFillsOn(ctx)).toBe(1);
   });
 
-  it('paints multiple cells along a horizontal drag', () => {
+  it('paints multiple cells along a horizontal drag', async () => {
+    const user = userEvent.setup();
     const { canvas, ctx } = setup();
     ctx.__clearEvents();
 
-    fireEvent.pointerDown(canvas, { clientX: 5, clientY: 25, pointerId: 1 });
-    for (let x = 10; x <= 45; x += 5) {
-      fireEvent.pointerMove(canvas, { clientX: x, clientY: 25, pointerId: 1 });
-    }
-    fireEvent.pointerUp(canvas, { clientX: 45, clientY: 25, pointerId: 1 });
+    await user.pointer([
+      { keys: '[MouseLeft>]', target: canvas, coords: { clientX: 5, clientY: 25 } },
+      { target: canvas, coords: { clientX: 15, clientY: 25 } },
+      { target: canvas, coords: { clientX: 25, clientY: 25 } },
+      { target: canvas, coords: { clientX: 35, clientY: 25 } },
+      { target: canvas, coords: { clientX: 45, clientY: 25 } },
+      { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 45, clientY: 25 } },
+    ]);
 
     expect(aliveFillsOn(ctx)).toBeGreaterThan(1);
+  });
+
+  it('erases along the drag path when the drag starts on an alive cell', async () => {
+    const user = userEvent.setup();
+    const { canvas, ctx } = setup();
+
+    await user.pointer([
+      { keys: '[MouseLeft>]', target: canvas, coords: { clientX: 5, clientY: 25 } },
+      { target: canvas, coords: { clientX: 15, clientY: 25 } },
+      { target: canvas, coords: { clientX: 25, clientY: 25 } },
+      { target: canvas, coords: { clientX: 35, clientY: 25 } },
+      { target: canvas, coords: { clientX: 45, clientY: 25 } },
+      { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 45, clientY: 25 } },
+    ]);
+    const aliveAfterPaint = aliveFillsOn(ctx);
+    expect(aliveAfterPaint).toBeGreaterThan(1);
+    ctx.__clearEvents();
+
+    await user.pointer([
+      { keys: '[MouseLeft>]', target: canvas, coords: { clientX: 5, clientY: 25 } },
+      { target: canvas, coords: { clientX: 15, clientY: 25 } },
+      { target: canvas, coords: { clientX: 25, clientY: 25 } },
+      { target: canvas, coords: { clientX: 35, clientY: 25 } },
+      { target: canvas, coords: { clientX: 45, clientY: 25 } },
+      { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 45, clientY: 25 } },
+    ]);
+
+    expect(aliveFillsOn(ctx)).toBeLessThan(aliveAfterPaint);
   });
 
   it('zooms in on wheel up (deltaY < 0), increasing the draw transform scale', () => {
@@ -121,26 +158,5 @@ describe('Canvas', () => {
 
     const scaleAfter = scaleOf(ctx);
     expect(scaleAfter).toBeGreaterThan(scaleBefore);
-  });
-
-  it('erases along the drag path when the drag starts on an alive cell', () => {
-    const { canvas, ctx } = setup();
-
-    fireEvent.pointerDown(canvas, { clientX: 5, clientY: 25, pointerId: 1 });
-    for (let x = 10; x <= 45; x += 5) {
-      fireEvent.pointerMove(canvas, { clientX: x, clientY: 25, pointerId: 1 });
-    }
-    fireEvent.pointerUp(canvas, { clientX: 45, clientY: 25, pointerId: 1 });
-    const aliveAfterPaint = aliveFillsOn(ctx);
-    expect(aliveAfterPaint).toBeGreaterThan(1);
-    ctx.__clearEvents();
-
-    fireEvent.pointerDown(canvas, { clientX: 5, clientY: 25, pointerId: 2 });
-    for (let x = 10; x <= 45; x += 5) {
-      fireEvent.pointerMove(canvas, { clientX: x, clientY: 25, pointerId: 2 });
-    }
-    fireEvent.pointerUp(canvas, { clientX: 45, clientY: 25, pointerId: 2 });
-
-    expect(aliveFillsOn(ctx)).toBeLessThan(aliveAfterPaint);
   });
 });

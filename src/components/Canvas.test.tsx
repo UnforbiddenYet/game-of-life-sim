@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { GameProvider } from '../state/context';
@@ -44,6 +44,13 @@ function setup(size = 5, width = 50, height = 50) {
 const aliveFillsOn = (ctx: RecordingContext): number =>
   ctx.__getEvents().filter((e) => e.type === 'roundRect').length;
 
+// Pump two animation frames so any pending dirty work flushes through the
+// rAF draw loop and event counts settle before assertions read them.
+const flushDraws = (): Promise<void> =>
+  new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+
 function withDevicePixelRatio<T>(value: number, fn: () => T): T {
   const original = window.devicePixelRatio;
   Object.defineProperty(window, 'devicePixelRatio', {
@@ -85,6 +92,7 @@ describe('Canvas', () => {
       { keys: '[MouseLeft>]', target: canvas, coords: { clientX: 25, clientY: 25 } },
       { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 25, clientY: 25 } },
     ]);
+    await flushDraws();
 
     expect(aliveFillsOn(ctx)).toBe(1);
   });
@@ -102,6 +110,7 @@ describe('Canvas', () => {
       { target: canvas, coords: { clientX: 45, clientY: 25 } },
       { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 45, clientY: 25 } },
     ]);
+    await flushDraws();
 
     expect(aliveFillsOn(ctx)).toBeGreaterThan(1);
   });
@@ -118,6 +127,7 @@ describe('Canvas', () => {
       { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 35, clientY: 25 } },
     ]);
     await user.keyboard('[/Space]'); // release Space
+    await flushDraws();
 
     expect(aliveFillsOn(ctx)).toBe(0);
   });
@@ -134,10 +144,12 @@ describe('Canvas', () => {
       { target: canvas, coords: { clientX: 45, clientY: 25 } },
       { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 45, clientY: 25 } },
     ]);
+    await flushDraws();
     expect(aliveFillsOn(ctx)).toBeGreaterThan(1);
     ctx.__clearEvents();
 
     await user.keyboard('{ArrowLeft}');
+    await flushDraws();
 
     expect(aliveFillsOn(ctx)).toBe(0);
   });
@@ -154,6 +166,7 @@ describe('Canvas', () => {
       { target: canvas, coords: { clientX: 45, clientY: 25 } },
       { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 45, clientY: 25 } },
     ]);
+    await flushDraws();
     const aliveAfterPaint = aliveFillsOn(ctx);
     expect(aliveAfterPaint).toBeGreaterThan(1);
     ctx.__clearEvents();
@@ -166,11 +179,12 @@ describe('Canvas', () => {
       { target: canvas, coords: { clientX: 45, clientY: 25 } },
       { keys: '[/MouseLeft]', target: canvas, coords: { clientX: 45, clientY: 25 } },
     ]);
+    await flushDraws();
 
     expect(aliveFillsOn(ctx)).toBeLessThan(aliveAfterPaint);
   });
 
-  it('zooms in on wheel up (deltaY < 0), increasing the draw transform scale', () => {
+  it('zooms in on wheel up (deltaY < 0), increasing the draw transform scale', async () => {
     const { canvas, ctx } = setup();
     const scaleOf = (c: RecordingContext) =>
       c
@@ -185,7 +199,6 @@ describe('Canvas', () => {
 
     fireEvent.wheel(canvas, { deltaY: -100, clientX: 25, clientY: 25 });
 
-    const scaleAfter = scaleOf(ctx);
-    expect(scaleAfter).toBeGreaterThan(scaleBefore);
+    await waitFor(() => expect(scaleOf(ctx)).toBeGreaterThan(scaleBefore));
   });
 });

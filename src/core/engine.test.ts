@@ -130,6 +130,31 @@ describe('createEngine', () => {
     expect(engine.consumeDirty()).toBe(false);
   });
 
+  it('reset replaces the grid with an empty one at the given size', () => {
+    const engine = createEngine(5);
+    engine.setCell(2, 2, 1);
+    engine.step();
+    engine.reset(7);
+    expect(engine.current.size).toBe(7);
+    expect(engine.generation).toBe(0);
+    expect(engine.past).toHaveLength(0);
+    expect(Array.from(engine.current.cells).every((c) => c === 0)).toBe(true);
+  });
+
+  it('importSnapshot loads grid + generation and wipes past', () => {
+    const engine = createEngine(5);
+    engine.step();
+    const src = createEngine(4);
+    src.setCell(1, 1, 1);
+    src.setCell(2, 2, 1);
+    engine.importSnapshot(src.current, 42);
+    expect(engine.current.size).toBe(4);
+    expect(engine.generation).toBe(42);
+    expect(engine.past).toHaveLength(0);
+    expect(engine.current.cells[1 * 4 + 1]).toBe(1);
+    expect(engine.current.cells[2 * 4 + 2]).toBe(1);
+  });
+
   it('step() turns a vertical blinker on its side', () => {
     const engine = createEngine(5);
     setCell(engine.current, 2, 1, 1);

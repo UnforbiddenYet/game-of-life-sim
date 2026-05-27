@@ -1,28 +1,10 @@
-import type { Action } from '../types/game';
-import type { GameSnapshot } from '../types/serialize';
+import type { UiAction } from './uiReducer';
 
-export const step = (): Action => ({ type: 'STEP' });
-export const undo = (): Action => ({ type: 'UNDO' });
-export const checkpoint = (): Action => ({ type: 'CHECKPOINT' });
-export const play = (): Action => ({ type: 'PLAY' });
-export const pause = (): Action => ({ type: 'PAUSE' });
-export const setCell = (x: number, y: number, alive: 0 | 1): Action => ({
-  type: 'SET_CELL',
-  x,
-  y,
-  alive,
-});
-export const clear = (): Action => ({ type: 'CLEAR' });
-export const randomize = (density: number): Action => ({
-  type: 'RANDOMIZE',
-  density,
-});
-export const setSpeed = (stepsPerSecond: number): Action => ({
+export const play = (): UiAction => ({ type: 'PLAY' });
+export const pause = (): UiAction => ({ type: 'PAUSE' });
+export const setSpeed = (stepsPerSecond: number): UiAction => ({
   type: 'SET_SPEED',
   stepsPerSecond,
 });
-export const newGame = (size: number): Action => ({ type: 'NEW_GAME', size });
-export const importSnapshot = (snapshot: GameSnapshot): Action => ({
-  type: 'IMPORT',
-  snapshot,
-});
+export const newGame = (size: number): UiAction => ({ type: 'NEW_GAME', size });
+export const setSize = (size: number): UiAction => ({ type: 'SET_SIZE', size });

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { Engine } from '../core/engine';
 import { fromJSON, toJSON } from '../core/serialize';
 import * as Actions from '../state/actions';
-import { useGameDispatch, useGameStateRef } from '../state/hooks';
-import type { GameState } from '../types/game';
+import { useEngine, useGameDispatch } from '../state/hooks';
 
 export interface UseImportExport {
   exportGame: () => void;
@@ -14,7 +14,7 @@ export interface UseImportExport {
 const ERROR_TIMEOUT_MS = 6000;
 
 export function useImportExport(): UseImportExport {
-  const stateRef = useGameStateRef();
+  const engine = useEngine();
   const dispatch = useGameDispatch();
   const [importError, setImportError] = useState<string | null>(null);
 
@@ -25,8 +25,8 @@ export function useImportExport(): UseImportExport {
   }, [importError]);
 
   const exportGame = useCallback(() => {
-    downloadGame(stateRef.current);
-  }, [stateRef]);
+    downloadGame(engine);
+  }, [engine]);
 
   const importGame = useCallback(
     async (file: File): Promise<void> => {
@@ -34,14 +34,15 @@ export function useImportExport(): UseImportExport {
         const text = await file.text();
         const parsed: unknown = JSON.parse(text);
         const snapshot = fromJSON(parsed);
-        dispatch(Actions.importSnapshot(snapshot));
+        engine.importSnapshot(snapshot.grid, snapshot.generation);
+        dispatch(Actions.setSize(snapshot.size));
         setImportError(null);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setImportError(`Import failed: ${message}`);
       }
     },
-    [dispatch],
+    [engine, dispatch],
   );
 
   const dismissError = useCallback(() => setImportError(null), []);
@@ -49,8 +50,8 @@ export function useImportExport(): UseImportExport {
   return { exportGame, importGame, importError, dismissError };
 }
 
-function downloadGame(state: GameState): void {
-  const json = toJSON(state);
+function downloadGame(engine: Engine): void {
+  const json = toJSON(engine.current, engine.generation);
   const blob = new Blob([JSON.stringify(json)], {
     type: 'application/json',
   });

@@ -2,11 +2,11 @@ import { useGesture } from '@use-gesture/react';
 import { useRef, type Dispatch, type RefObject, type SetStateAction } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { panCamera, screenToCell, zoomCamera } from '../core/camera';
+import type { Engine } from '../core/engine';
 import { getCell, inBounds } from '../core/grid';
 import * as Actions from '../state/actions';
-import type { Action, Mode } from '../types/game';
+import { useEngine, useGameDispatch, useGameUi } from '../state/hooks';
 import type { Camera } from '../types/camera';
-import type { Grid } from '../types/grid';
 
 const WHEEL_ZOOM_SENSITIVITY = 0.001;
 const RANDOMIZE_DENSITY = 0.3;
@@ -25,27 +25,17 @@ interface Args {
   ref: RefObject<HTMLCanvasElement | null>;
   camera: Camera;
   setCamera: Dispatch<SetStateAction<Camera>>;
-  grid: Grid;
-  size: number;
-  mode: Mode;
-  stepsPerSecond: number;
-  canUndo: boolean;
-  dispatch: Dispatch<Action>;
 }
 
-export function useGridInteractions({
-  ref,
-  camera,
-  setCamera,
-  grid,
-  size,
-  mode,
-  stepsPerSecond,
-  canUndo,
-  dispatch,
-}: Args) {
+export function useGridInteractions({ ref, camera, setCamera }: Args) {
+  const engine = useEngine();
+  const dispatch = useGameDispatch();
+  const { mode, stepsPerSecond, size } = useGameUi();
+
   const stroke = useRef<Stroke | null>(null);
   const spacePressed = useRef(false);
+  const engineRef = useRef<Engine>(engine);
+  engineRef.current = engine;
 
   useHotkeys(
     'space',
@@ -66,7 +56,7 @@ export function useGridInteractions({
     'right',
     () => {
       if (mode === 'playing') return;
-      dispatch(Actions.step());
+      engineRef.current.step();
     },
     [mode],
   );
@@ -74,14 +64,14 @@ export function useGridInteractions({
   useHotkeys(
     'left',
     () => {
-      if (mode === 'playing' || !canUndo) return;
-      dispatch(Actions.undo());
+      if (mode === 'playing') return;
+      engineRef.current.undo();
     },
-    [mode, canUndo],
+    [mode],
   );
 
-  useHotkeys('c', () => dispatch(Actions.clear()));
-  useHotkeys('r', () => dispatch(Actions.randomize(RANDOMIZE_DENSITY)));
+  useHotkeys('c', () => engineRef.current.clear());
+  useHotkeys('r', () => engineRef.current.randomize(RANDOMIZE_DENSITY));
 
   useHotkeys(
     'bracketright',
@@ -119,16 +109,17 @@ export function useGridInteractions({
         const idx = cell.y * size + cell.x;
 
         if (first) {
-          const paintValue: 0 | 1 = getCell(grid, cell.x, cell.y) === 1 ? 0 : 1;
+          const paintValue: 0 | 1 =
+            getCell(engineRef.current.current, cell.x, cell.y) === 1 ? 0 : 1;
           stroke.current = { paintValue, touched: new Set([idx]) };
-          dispatch(Actions.checkpoint());
-          dispatch(Actions.setCell(cell.x, cell.y, paintValue));
+          engineRef.current.checkpoint();
+          engineRef.current.setCell(cell.x, cell.y, paintValue);
           return;
         }
 
         if (!stroke.current || stroke.current.touched.has(idx)) return;
         stroke.current.touched.add(idx);
-        dispatch(Actions.setCell(cell.x, cell.y, stroke.current.paintValue));
+        engineRef.current.setCell(cell.x, cell.y, stroke.current.paintValue);
       },
       onWheel: ({ event }) => {
         const cursor = cursorOf(event as CursorEvent);

@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { getCell, setCell } from './grid';
+import { createGrid, getCell, setCell } from './grid';
 import { fromJSON, toJSON } from './serialize';
-import { initialState } from '../state/reducer';
 
 describe('toJSON', () => {
   it('encodes a paused empty game with no alive cells', () => {
-    const s = initialState(5);
-    expect(toJSON(s)).toEqual({
+    const grid = createGrid(5);
+    expect(toJSON(grid, 0)).toEqual({
       version: 1,
       size: 5,
       generation: 0,
@@ -16,12 +15,12 @@ describe('toJSON', () => {
   });
 
   it('lists only alive cells, sparsely', () => {
-    const s = initialState(5);
-    setCell(s.grid, 0, 0, 1);
-    setCell(s.grid, 4, 4, 1);
-    setCell(s.grid, 2, 3, 1);
+    const grid = createGrid(5);
+    setCell(grid, 0, 0, 1);
+    setCell(grid, 4, 4, 1);
+    setCell(grid, 2, 3, 1);
 
-    const json = toJSON(s);
+    const json = toJSON(grid, 0);
     expect(json.cells).toHaveLength(3);
     expect(new Set(json.cells.map(([x, y]) => `${x},${y}`))).toEqual(
       new Set(['0,0', '4,4', '2,3']),
@@ -31,12 +30,12 @@ describe('toJSON', () => {
 
 describe('fromJSON', () => {
   it('round-trips a serialized game back to the same alive cells', () => {
-    const s = initialState(7);
-    setCell(s.grid, 0, 0, 1);
-    setCell(s.grid, 6, 6, 1);
-    setCell(s.grid, 3, 4, 1);
+    const grid = createGrid(7);
+    setCell(grid, 0, 0, 1);
+    setCell(grid, 6, 6, 1);
+    setCell(grid, 3, 4, 1);
 
-    const decoded = fromJSON(JSON.parse(JSON.stringify(toJSON(s))));
+    const decoded = fromJSON(JSON.parse(JSON.stringify(toJSON(grid, 0))));
 
     expect(decoded.size).toBe(7);
     expect(decoded.generation).toBe(0);

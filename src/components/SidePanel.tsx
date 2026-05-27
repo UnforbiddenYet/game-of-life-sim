@@ -2,11 +2,12 @@ import { Box, Button, Flex, Slider, Text, TextField } from '@radix-ui/themes';
 import { Shuffle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import * as Actions from '../state/actions';
-import { useGameDispatch, useGameUi } from '../state/hooks';
+import { useEngine, useGameDispatch, useGameUi } from '../state/hooks';
 
 export function SidePanel() {
   const { size, stepsPerSecond } = useGameUi();
   const dispatch = useGameDispatch();
+  const engine = useEngine();
   const [sizeDraft, setSizeDraft] = useState(String(size));
   useEffect(() => {
     setSizeDraft(String(size));
@@ -72,7 +73,7 @@ export function SidePanel() {
               type="button"
               variant="surface"
               color="gray"
-              onClick={() => dispatch(Actions.randomize(0.3))}
+              onClick={() => engine.randomize(0.3)}
             >
               <Shuffle size={16} />
               <span>Randomize Cells</span>

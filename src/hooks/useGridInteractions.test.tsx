@@ -1,39 +1,43 @@
-import { renderHook } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useRef, type RefObject } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createGrid } from '../core/grid';
-import type { Mode } from '../types/game';
+import type { Engine } from '../core/engine';
+import { GameProvider } from '../state/context';
+import { useEngine, useGameUi } from '../state/hooks';
+import type { GameUi } from '../types/game';
 import { useGridInteractions } from './useGridInteractions';
 
-interface SetupArgs {
-  mode?: Mode;
-  stepsPerSecond?: number;
-  canUndo?: boolean;
+interface Harness {
+  engine: Engine;
+  ui: GameUi;
 }
 
-function setup({
-  mode = 'paused',
-  stepsPerSecond = 10,
-  canUndo = false,
-}: SetupArgs = {}) {
-  const dispatch = vi.fn();
-  const setCamera = vi.fn();
-  renderHook(() => {
+function setup({ canUndo = false, stepsPerSecond = 10 } = {}) {
+  const captured: Harness = { engine: null as never, ui: null as never };
+
+  function HarnessInner() {
     const ref = useRef<HTMLCanvasElement | null>(null);
+    captured.engine = useEngine();
+    captured.ui = useGameUi();
     useGridInteractions({
       ref: ref as RefObject<HTMLCanvasElement | null>,
       camera: { x: 0, y: 0, z: 1 },
-      setCamera,
-      grid: createGrid(10),
-      size: 10,
-      dispatch,
-      mode,
-      stepsPerSecond,
-      canUndo,
+      setCamera: vi.fn(),
     });
-  });
-  return { dispatch, setCamera };
+    return <canvas ref={ref} />;
+  }
+
+  render(
+    <GameProvider size={10} stepsPerSecond={stepsPerSecond}>
+      <HarnessInner />
+    </GameProvider>,
+  );
+
+  if (canUndo) {
+    act(() => captured.engine.checkpoint());
+  }
+  return captured;
 }
 
 afterEach(() => {
@@ -41,77 +45,69 @@ afterEach(() => {
 });
 
 describe('useGridInteractions keyboard shortcuts', () => {
-  it('K dispatches PLAY when paused', async () => {
-    const { dispatch } = setup({ mode: 'paused' });
+  it('K toggles playing mode', async () => {
+    const captured = setup();
+    expect(captured.ui.mode).toBe('paused');
     await userEvent.keyboard('k');
-    expect(dispatch).toHaveBeenCalledWith({ type: 'PLAY' });
+    expect(captured.ui.mode).toBe('playing');
+    await userEvent.keyboard('k');
+    expect(captured.ui.mode).toBe('paused');
   });
 
-  it('K dispatches PAUSE when playing', async () => {
-    const { dispatch } = setup({ mode: 'playing' });
-    await userEvent.keyboard('k');
-    expect(dispatch).toHaveBeenCalledWith({ type: 'PAUSE' });
-  });
-
-  it('ArrowRight dispatches STEP when paused', async () => {
-    const { dispatch } = setup({ mode: 'paused' });
+  it('ArrowRight steps the simulation when paused', async () => {
+    const captured = setup();
+    const startGeneration = captured.engine.generation;
     await userEvent.keyboard('{ArrowRight}');
-    expect(dispatch).toHaveBeenCalledWith({ type: 'STEP' });
+    expect(captured.engine.generation).toBe(startGeneration + 1);
   });
 
   it('ArrowRight is ignored while playing', async () => {
-    const { dispatch } = setup({ mode: 'playing' });
+    const captured = setup();
+    await userEvent.keyboard('k');
+    const startGeneration = captured.engine.generation;
     await userEvent.keyboard('{ArrowRight}');
-    expect(dispatch).not.toHaveBeenCalledWith({ type: 'STEP' });
+    expect(captured.engine.generation).toBe(startGeneration);
   });
 
-  it('ArrowLeft dispatches UNDO when past is non-empty and paused', async () => {
-    const { dispatch } = setup({ mode: 'paused', canUndo: true });
+  it('ArrowLeft undoes when past is non-empty and paused', async () => {
+    const captured = setup({ canUndo: true });
+    expect(captured.engine.past).toHaveLength(1);
     await userEvent.keyboard('{ArrowLeft}');
-    expect(dispatch).toHaveBeenCalledWith({ type: 'UNDO' });
+    expect(captured.engine.past).toHaveLength(0);
   });
 
   it('ArrowLeft is a no-op when past is empty', async () => {
-    const { dispatch } = setup({ mode: 'paused', canUndo: false });
+    const captured = setup();
     await userEvent.keyboard('{ArrowLeft}');
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(captured.engine.past).toHaveLength(0);
   });
 
-  it('ArrowLeft is a no-op while playing', async () => {
-    const { dispatch } = setup({ mode: 'playing', canUndo: true });
-    await userEvent.keyboard('{ArrowLeft}');
-    expect(dispatch).not.toHaveBeenCalled();
-  });
-
-  it('C dispatches CLEAR', async () => {
-    const { dispatch } = setup();
+  it('C clears the grid', async () => {
+    const captured = setup();
+    act(() => captured.engine.setCell(2, 2, 1));
     await userEvent.keyboard('c');
-    expect(dispatch).toHaveBeenCalledWith({ type: 'CLEAR' });
+    expect(captured.engine.current.cells.every((v) => v === 0)).toBe(true);
   });
 
-  it('R dispatches RANDOMIZE', async () => {
-    const { dispatch } = setup();
+  it('R randomizes the grid', async () => {
+    const captured = setup();
     await userEvent.keyboard('r');
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'RANDOMIZE' }),
+    const aliveCount = captured.engine.current.cells.reduce(
+      (n, v) => n + v,
+      0,
     );
+    expect(aliveCount).toBeGreaterThan(0);
   });
 
-  it('] dispatches SET_SPEED with sps + 1', async () => {
-    const { dispatch } = setup({ stepsPerSecond: 10 });
-    await userEvent.keyboard(']]');
-    expect(dispatch).toHaveBeenCalledWith({
-      type: 'SET_SPEED',
-      stepsPerSecond: 11,
-    });
+  it('] increments stepsPerSecond', async () => {
+    const captured = setup({ stepsPerSecond: 10 });
+    await userEvent.keyboard(']');
+    expect(captured.ui.stepsPerSecond).toBe(11);
   });
 
-  it('[ dispatches SET_SPEED with sps - 1', async () => {
-    const { dispatch } = setup({ stepsPerSecond: 10 });
-    await userEvent.keyboard('[[');
-    expect(dispatch).toHaveBeenCalledWith({
-      type: 'SET_SPEED',
-      stepsPerSecond: 9,
-    });
+  it('[ decrements stepsPerSecond', async () => {
+    const captured = setup({ stepsPerSecond: 10 });
+    await userEvent.keyboard('[BracketLeft]');
+    expect(captured.ui.stepsPerSecond).toBe(9);
   });
 });

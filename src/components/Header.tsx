@@ -1,7 +1,7 @@
-import { Badge, Box, Button, Flex, Heading } from '@radix-ui/themes';
-import { Download, Upload } from 'lucide-react';
-import { useRef } from 'react';
-import { useGameTick } from '../state/hooks';
+import { Badge, Box, Button, Flex, Heading } from "@radix-ui/themes";
+import { Download, Upload } from "lucide-react";
+import { useRef } from "react";
+import { useGameTick } from "../state/hooks";
 
 export interface HeaderProps {
   onExport: () => void;
@@ -50,7 +50,7 @@ export function Header({ onExport, onImport }: HeaderProps) {
             color="gray"
             onClick={onExport}
           >
-            <Download size={16} />
+            <Upload size={16} />
             <span>Export</span>
           </Button>
           <Button
@@ -60,7 +60,7 @@ export function Header({ onExport, onImport }: HeaderProps) {
             color="gray"
             onClick={() => fileInputRef.current?.click()}
           >
-            <Upload size={16} />
+            <Download size={16} />
             <span>Import</span>
           </Button>
           <Box asChild>
@@ -73,7 +73,7 @@ export function Header({ onExport, onImport }: HeaderProps) {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) onImport(file);
-                e.target.value = '';
+                e.target.value = "";
               }}
             />
           </Box>

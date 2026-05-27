@@ -1,9 +1,9 @@
-import type { GameState } from '../types/game';
+import type { Grid } from '../types/grid';
 import type { GameSnapshot, SerializedGame } from '../types/serialize';
 import { MAX_SIZE, MIN_SIZE, createGrid, setCell } from './grid';
 
-export function toJSON(state: GameState): SerializedGame {
-  const { grid, size, generation } = state;
+export function toJSON(grid: Grid, generation: number): SerializedGame {
+  const { size } = grid;
   const cells: Array<[number, number]> = [];
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {

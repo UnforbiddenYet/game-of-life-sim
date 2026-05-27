@@ -1,5 +1,5 @@
 import { Theme } from '@radix-ui/themes';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { GameProvider } from '../state/context';
 import { CanvasStatus } from './CanvasStatus';
@@ -32,24 +32,33 @@ describe('PlaybackDock', () => {
     ).toBeDisabled();
   });
 
-  it('Step enables Undo after one tick while paused', () => {
+  it('Step enables Undo after one tick while paused', async () => {
     renderDock();
     expect(
       screen.getByRole('button', { name: /undo last step/i }),
     ).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: /step simulation/i }));
-    expect(
-      screen.getByRole('button', { name: /undo last step/i }),
-    ).not.toBeDisabled();
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /undo last step/i }),
+      ).not.toBeDisabled(),
+    );
   });
 
-  it('Clear after Step puts Undo back in the disabled state', () => {
+  it('Clear after Step puts Undo back in the disabled state', async () => {
     renderDock();
     fireEvent.click(screen.getByRole('button', { name: /step simulation/i }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /undo last step/i }),
+      ).not.toBeDisabled(),
+    );
     fireEvent.click(screen.getByRole('button', { name: /clear grid/i }));
-    expect(
-      screen.getByRole('button', { name: /undo last step/i }),
-    ).toBeDisabled();
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /undo last step/i }),
+      ).toBeDisabled(),
+    );
   });
 
   it('clicking Play swaps the pill to running with the current speed', () => {

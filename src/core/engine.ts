@@ -14,10 +14,13 @@ export interface Engine {
   randomize(density: number, rng?: () => number): void;
   checkpoint(): void;
   undo(): boolean;
+  reset(size: number): void;
+  importSnapshot(grid: Grid, generation: number): void;
   consumeDirty(): boolean;
 }
 
-export function createEngine(size: number): Engine {
+export function createEngine(initialSize: number): Engine {
+  let size = initialSize;
   let front = createGrid(size);
   let back = createGrid(size);
   let generation = 0;
@@ -79,6 +82,22 @@ export function createEngine(size: number): Engine {
       past = past.slice(0, -1);
       dirty = true;
       return true;
+    },
+    reset(newSize) {
+      size = newSize;
+      front = createGrid(newSize);
+      back = createGrid(newSize);
+      generation = 0;
+      past = [];
+      dirty = true;
+    },
+    importSnapshot(grid, gen) {
+      size = grid.size;
+      front = cloneGrid(grid);
+      back = createGrid(size);
+      generation = gen;
+      past = [];
+      dirty = true;
     },
     consumeDirty() {
       const d = dirty;

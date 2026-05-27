@@ -1,19 +1,28 @@
 import {
-  useLayoutEffect,
+  useEffect,
   useMemo,
   useReducer,
   useRef,
+  useState,
   type ReactNode,
 } from 'react';
+import { createEngine, type Engine } from '../core/engine';
 import { aliveCount } from '../core/grid';
-import { DEFAULT_SIZE, DEFAULT_SPS, initialState, reducer } from './reducer';
+import type { GameTick, GameUi } from '../types/game';
+import {
+  DEFAULT_SIZE,
+  DEFAULT_SPS,
+  initialUi,
+  uiReducer,
+} from './uiReducer';
 import {
   DispatchContext,
-  StateContext,
-  StateRefContext,
+  EngineContext,
   TickContext,
   UiContext,
 } from './hooks';
+
+const PULSE_MS = 100;
 
 export interface GameProviderProps {
   size?: number;
@@ -26,42 +35,51 @@ export function GameProvider({
   stepsPerSecond = DEFAULT_SPS,
   children,
 }: GameProviderProps) {
-  const [state, dispatch] = useReducer(reducer, undefined, () =>
-    initialState(size, stepsPerSecond),
+  const [ui, dispatch] = useReducer(uiReducer, undefined, () =>
+    initialUi(size, stepsPerSecond),
   );
 
-  // Kept in sync with the latest committed state so handlers can read on
-  // demand without forcing a tick-rate re-render on subscribers.
-  const stateRef = useRef(state);
-  useLayoutEffect(() => {
-    stateRef.current = state;
-  }, [state]);
+  const engineRef = useRef<Engine | null>(null);
+  if (engineRef.current === null) {
+    engineRef.current = createEngine(ui.size);
+  }
+  if (engineRef.current.current.size !== ui.size) {
+    engineRef.current.reset(ui.size);
+  }
+  const engine = engineRef.current;
 
-  const canUndo = state.past.length > 0;
-  const ui = useMemo(
-    () => ({
-      size: state.size,
-      mode: state.mode,
-      stepsPerSecond: state.stepsPerSecond,
-      canUndo,
-    }),
-    [state.size, state.mode, state.stepsPerSecond, canUndo],
-  );
+  const [tick, setTick] = useState<GameTick>({ generation: 0, alive: 0 });
+  const [canUndo, setCanUndo] = useState(false);
 
-  const tick = useMemo(
-    () => ({ generation: state.generation, alive: aliveCount(state.grid) }),
-    [state.generation, state.grid],
+  useEffect(() => {
+    const sample = () => {
+      const generation = engine.generation;
+      const alive = aliveCount(engine.current);
+      setTick((prev) =>
+        prev.generation === generation && prev.alive === alive
+          ? prev
+          : { generation, alive },
+      );
+      const undoable = engine.past.length > 0;
+      setCanUndo((prev) => (prev === undoable ? prev : undoable));
+    };
+    sample();
+    const id = window.setInterval(sample, PULSE_MS);
+    return () => window.clearInterval(id);
+  }, [engine]);
+
+  const uiValue: GameUi = useMemo(
+    () => ({ ...ui, canUndo }),
+    [ui, canUndo],
   );
 
   return (
     <DispatchContext.Provider value={dispatch}>
-      <StateContext.Provider value={state}>
-        <StateRefContext.Provider value={stateRef}>
-          <UiContext.Provider value={ui}>
-            <TickContext.Provider value={tick}>{children}</TickContext.Provider>
-          </UiContext.Provider>
-        </StateRefContext.Provider>
-      </StateContext.Provider>
+      <EngineContext.Provider value={engine}>
+        <UiContext.Provider value={uiValue}>
+          <TickContext.Provider value={tick}>{children}</TickContext.Provider>
+        </UiContext.Provider>
+      </EngineContext.Provider>
     </DispatchContext.Provider>
   );
 }

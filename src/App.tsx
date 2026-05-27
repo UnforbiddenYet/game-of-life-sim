@@ -7,9 +7,8 @@ import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { SidePanel } from "./components/SidePanel";
 import { useGameLoop } from "./hooks/useGameLoop";
 import { useImportExport } from "./hooks/useImportExport";
-import * as Actions from "./state/actions";
 import { GameProvider } from "./state/context";
-import { useGameDispatch, useGameUi } from "./state/hooks";
+import { useEngine, useGameUi } from "./state/hooks";
 
 import "@radix-ui/themes/styles.css";
 import "./styles/styles.css";
@@ -25,14 +24,14 @@ export default function App() {
 function AppShell() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { mode, stepsPerSecond } = useGameUi();
-  const dispatch = useGameDispatch();
+  const engine = useEngine();
   const { exportGame, importGame, importError, dismissError } =
     useImportExport();
 
   useGameLoop({
     isPlaying: mode === "playing",
     stepsPerSecond,
-    onTick: () => dispatch(Actions.step()),
+    onTick: () => engine.step(),
   });
 
   return (

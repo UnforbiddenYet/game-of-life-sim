@@ -1,5 +1,5 @@
 import { Theme } from '@radix-ui/themes';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { vi } from 'vitest';
@@ -57,15 +57,17 @@ describe('SidePanel — Grid configuration', () => {
 });
 
 describe('SidePanel — Generation', () => {
-  it('Randomize Cells fills the grid with live cells', () => {
+  it('Randomize Cells fills the grid with live cells', async () => {
     renderPanel({ size: 30 });
     expect(screen.getByText(/^alive/i)).toHaveTextContent('Alive 0');
     fireEvent.click(
       screen.getByRole('button', { name: /randomize cells/i }),
     );
-    const aliveText =
-      screen.getByText(/^alive/i).textContent?.replace(/\D/g, '') ?? '0';
-    expect(Number(aliveText)).toBeGreaterThan(0);
+    await waitFor(() => {
+      const aliveText =
+        screen.getByText(/^alive/i).textContent?.replace(/\D/g, '') ?? '0';
+      expect(Number(aliveText)).toBeGreaterThan(0);
+    });
   });
 });
 

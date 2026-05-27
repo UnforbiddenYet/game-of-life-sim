@@ -1,8 +1,29 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
+import { useCamera } from '../hooks/useCamera';
 import { GameProvider } from '../state/context';
 import { Canvas } from './Canvas';
+
+function CanvasHarness({
+  size,
+  width,
+  height,
+}: {
+  size: number;
+  width: number;
+  height: number;
+}) {
+  const [camera, setCamera] = useCamera(size, { width, height });
+  return (
+    <Canvas
+      width={width}
+      height={height}
+      camera={camera}
+      setCamera={setCamera}
+    />
+  );
+}
 
 interface CanvasEvent {
   readonly type: string;
@@ -17,7 +38,7 @@ interface RecordingContext extends CanvasRenderingContext2D {
 function setup(size = 5, width = 50, height = 50) {
   const result = render(
     <GameProvider size={size}>
-      <Canvas width={width} height={height} />
+      <CanvasHarness size={size} width={width} height={height} />
     </GameProvider>,
   );
   const canvas = result.container.querySelector('canvas');

@@ -1,13 +1,13 @@
-import { Flex, IconButton } from '@radix-ui/themes';
-import { Pause, Play, SkipForward, Undo2, X } from 'lucide-react';
-import * as Actions from '../state/actions';
-import { useEngine, useGameDispatch, useGameUi } from '../state/hooks';
+import { Flex, IconButton } from "@radix-ui/themes";
+import { Pause, Play, SkipForward, SkipBack, X } from "lucide-react";
+import * as Actions from "../state/actions";
+import { useEngine, useGameDispatch, useGameUi } from "../state/hooks";
 
 export function PlaybackDock() {
   const { mode, canUndo } = useGameUi();
   const dispatch = useGameDispatch();
   const engine = useEngine();
-  const playing = mode === 'playing';
+  const playing = mode === "playing";
 
   return (
     <Flex
@@ -28,19 +28,17 @@ export function PlaybackDock() {
         disabled={playing || !canUndo}
         onClick={() => engine.undo()}
       >
-        <Undo2 size={18} />
+        <SkipBack size={18} />
       </IconButton>
 
       <IconButton
-        aria-label={playing ? 'Pause simulation' : 'Play simulation'}
+        aria-label={playing ? "Pause simulation" : "Play simulation"}
         variant="solid"
         color="gray"
         radius="full"
         size="4"
         className="dock-play"
-        onClick={() =>
-          dispatch(playing ? Actions.pause() : Actions.play())
-        }
+        onClick={() => dispatch(playing ? Actions.pause() : Actions.play())}
       >
         {playing ? <Pause size={20} /> : <Play size={20} />}
       </IconButton>

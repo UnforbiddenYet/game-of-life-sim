@@ -28,7 +28,7 @@ function makeCtx(width = 30, height = 30): RecordingContext {
 }
 
 describe('drawGrid', () => {
-  it('draws each alive cell as a 1×1 fill at its canvas coordinates', () => {
+  it('draws each alive cell as a rounded fill inside its grid coordinate', () => {
     const ctx = makeCtx();
     const grid = createGrid(3);
     setCell(grid, 1, 1, 1);
@@ -41,16 +41,17 @@ describe('drawGrid', () => {
       theme,
     );
 
-    const cellFills = ctx
+    const cellShapes = ctx
       .__getEvents()
-      .filter(
-        (e) =>
-          e.type === 'fillRect' &&
-          e.props.width === 1 &&
-          e.props.height === 1,
-      )
-      .map((e) => [e.props.x, e.props.y]);
-    expect(cellFills).toEqual([[1, 1]]);
+      .filter((e) => e.type === 'roundRect');
+    expect(cellShapes).toHaveLength(1);
+    const shape = cellShapes[0]!;
+    expect(shape.props.x).toBeGreaterThanOrEqual(1);
+    expect(shape.props.x).toBeLessThan(2);
+    expect(shape.props.y).toBeGreaterThanOrEqual(1);
+    expect(shape.props.y).toBeLessThan(2);
+    expect(shape.props.width).toBeGreaterThan(0);
+    expect(shape.props.width).toBeLessThanOrEqual(1);
   });
 
   it('draws grid lines when each cell is large enough to read them', () => {

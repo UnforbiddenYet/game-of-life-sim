@@ -4,7 +4,7 @@ import type { Shortcut } from "../types/ui";
 export const DEFAULT_THEME: CanvasTheme = {
   background: "#eef1ef",
   grid: "#dde2de",
-  alive: "#2f7d5e",
+  alive: "#2c3441",
 };
 
 export const SHORTCUTS: readonly Shortcut[] = [

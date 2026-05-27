@@ -32,10 +32,15 @@ export function drawGrid(
   }
 
   ctx.fillStyle = theme.alive;
+  const inset = 0.08;
+  const size = 1 - inset * 2;
+  const radius = 0.2;
   for (let y = 0; y < grid.size; y++) {
     for (let x = 0; x < grid.size; x++) {
       if (grid.cells[y * grid.size + x] === 1) {
-        ctx.fillRect(x, y, 1, 1);
+        ctx.beginPath();
+        ctx.roundRect(x + inset, y + inset, size, size, radius);
+        ctx.fill();
       }
     }
   }

@@ -42,14 +42,7 @@ function setup(size = 5, width = 50, height = 50) {
 }
 
 const aliveFillsOn = (ctx: RecordingContext): number =>
-  ctx
-    .__getEvents()
-    .filter(
-      (e) =>
-        e.type === 'fillRect' &&
-        e.props.width === 1 &&
-        e.props.height === 1,
-    ).length;
+  ctx.__getEvents().filter((e) => e.type === 'roundRect').length;
 
 function withDevicePixelRatio<T>(value: number, fn: () => T): T {
   const original = window.devicePixelRatio;

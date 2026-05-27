@@ -5,8 +5,6 @@ import { CanvasPanel } from "./components/CanvasPanel";
 import { Header } from "./components/Header";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { SidePanel } from "./components/SidePanel";
-import { SizeDialog } from "./components/SizeDialog";
-import { Toolbar } from "./components/Toolbar";
 import { useGameLoop } from "./hooks/useGameLoop";
 import { useImportExport } from "./hooks/useImportExport";
 import * as Actions from "./state/actions";
@@ -25,9 +23,8 @@ export default function App() {
 }
 
 function AppShell() {
-  const [isSizeDialogOpen, setIsSizeDialogOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const { mode, size, stepsPerSecond } = useGameUi();
+  const { mode, stepsPerSecond } = useGameUi();
   const dispatch = useGameDispatch();
   const { exportGame, importGame, importError, dismissError } =
     useImportExport();
@@ -42,32 +39,16 @@ function AppShell() {
     <Theme appearance="light" accentColor="green" radius="large">
       <Flex className="app-shell" direction="column">
         <Header onExport={exportGame} onImport={importGame} />
-        <Toolbar
-          stepsPerSecond={stepsPerSecond}
-          onRandomize={() => dispatch(Actions.randomize(0.3))}
-          onOpenNewGame={() => setIsSizeDialogOpen(true)}
-          onSetSpeed={(sps) => dispatch(Actions.setSpeed(sps))}
-        />
 
         <Flex className="workspace" gap="4" px="5" pb="5">
           <CanvasPanel />
           <SidePanel />
         </Flex>
 
-        <SizeDialog
-          open={isSizeDialogOpen}
-          currentSize={size}
-          onOpenChange={setIsSizeDialogOpen}
-          onSubmit={(nextSize) => {
-            dispatch(Actions.newGame(nextSize));
-            setIsSizeDialogOpen(false);
-          }}
-        />
-
         <IconButton
           className="help-fab"
           aria-label="Show keyboard shortcuts"
-          variant="solid"
+          variant="surface"
           color="gray"
           radius="full"
           size="3"

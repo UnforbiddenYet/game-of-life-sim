@@ -19,46 +19,6 @@
   line-height: 1;
 }
 
-.toolbar-surface {
-  border-bottom: 1px solid var(--gray-a4);
-  background: var(--color-panel-translucent);
-  backdrop-filter: blur(14px);
-}
-
-.toolbar-title {
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.toolbar-button {
-  white-space: nowrap;
-}
-
-.toolbar-stat {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.toolbar-stat-value {
-  display: inline-block;
-  text-align: right;
-}
-
-.toolbar-stat-value-generation,
-.toolbar-stat-value-alive {
-  min-width: 7ch;
-}
-
-.toolbar-stat-value-speed {
-  min-width: 2ch;
-}
-
-.toolbar-meta {
-  margin-left: auto;
-}
-
 .workspace {
   flex: 1;
   min-height: 0;
@@ -118,7 +78,10 @@
   position: fixed;
   right: 24px;
   bottom: 24px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  background: var(--color-panel-solid);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px var(--gray-a4);
 }
 
 .import-error {

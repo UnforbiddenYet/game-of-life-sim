@@ -1,5 +1,6 @@
 import { useEffect, type RefObject } from 'react';
 import { drawGrid } from '../canvas/drawGrid';
+import { profile } from '../canvas/profile';
 import type { Camera } from '../types/camera';
 import type { CanvasTheme } from '../types/canvas';
 import type { Grid } from '../types/grid';
@@ -30,6 +31,8 @@ export function useCanvasDraw({
     const dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
-    drawGrid(ctx, grid, camera, { width, height }, theme, dpr);
+    profile('drawGrid', () =>
+      drawGrid(ctx, grid, camera, { width, height }, theme, dpr),
+    );
   }, [ref, grid, camera, width, height, theme]);
 }

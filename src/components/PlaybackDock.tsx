@@ -33,9 +33,10 @@ export function PlaybackDock() {
       <IconButton
         aria-label={playing ? 'Pause simulation' : 'Play simulation'}
         variant="solid"
-        color="green"
+        color="gray"
         radius="full"
         size="4"
+        className="dock-play"
         onClick={() =>
           dispatch(playing ? Actions.pause() : Actions.play())
         }
@@ -54,6 +55,8 @@ export function PlaybackDock() {
       >
         <SkipForward size={18} />
       </IconButton>
+
+      <span className="dock-divider" aria-hidden="true" />
 
       <IconButton
         aria-label="Clear grid"

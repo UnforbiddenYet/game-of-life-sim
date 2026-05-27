@@ -95,10 +95,14 @@
   box-shadow: inset 0 0 0 1px var(--gray-a4);
 }
 
+.cell-rules {
+  border-top: 1px solid var(--gray-a4);
+}
+
 .help-fab {
   position: fixed;
   right: 44px;
-  top: 24px;
+  bottom: 44px;
   background: var(--color-panel-solid);
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.1),

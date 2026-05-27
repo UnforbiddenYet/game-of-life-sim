@@ -4,6 +4,9 @@ import { useRef } from "react";
 import * as Actions from "../state/actions";
 import { useEngine, useGameDispatch, useGameUi } from "../state/hooks";
 
+const MIN_GRID = 3;
+const MAX_GRID = 1000;
+
 export function SidePanel() {
   const { size, stepsPerSecond } = useGameUi();
   const dispatch = useGameDispatch();
@@ -12,18 +15,23 @@ export function SidePanel() {
 
   const applyResize = () => {
     const next = Number(sizeInputRef.current?.value ?? "");
-    if (Number.isInteger(next) && next >= 3 && next <= 1000) {
+    if (Number.isInteger(next) && next >= MIN_GRID && next <= MAX_GRID) {
       dispatch(Actions.newGame(next));
     }
   };
   return (
     <Box asChild className="side-panel" p="5">
       <aside aria-label="Game settings">
-        <Flex direction="column" gap="5">
+        <Flex direction="column" gap="5" height="100%">
           <Flex direction="column" gap="2">
-            <Text size="1" weight="bold" className="side-section-label">
-              SIMULATION SPEED
-            </Text>
+            <Flex justify="between" align="baseline">
+              <Text size="1" weight="bold" className="side-section-label">
+                SIMULATION SPEED
+              </Text>
+              <Text size="2" weight="medium" color="gray">
+                {stepsPerSecond}/s
+              </Text>
+            </Flex>
             <Slider
               aria-label="Simulation speed"
               min={1}
@@ -43,12 +51,21 @@ export function SidePanel() {
             </Text>
             <Flex direction="column" gap="1" asChild>
               <label>
-                <Text size="2">Grid size</Text>
+                <Flex justify="between" align="baseline">
+                  <Text size="2">Grid size</Text>
+                  <Text size="1" color="gray">
+                    {MIN_GRID}–{MAX_GRID}
+                  </Text>
+                </Flex>
                 <TextField.Root
                   key={size}
                   ref={sizeInputRef}
                   type="number"
+                  inputMode="numeric"
                   aria-label="Grid size"
+                  min={MIN_GRID}
+                  max={MAX_GRID}
+                  placeholder={`${MIN_GRID}–${MAX_GRID}`}
                   defaultValue={String(size)}
                 />
               </label>
@@ -78,7 +95,13 @@ export function SidePanel() {
             </Button>
           </Flex>
 
-          <Flex direction="column" gap="2">
+          <Flex
+            direction="column"
+            gap="2"
+            mt="auto"
+            pt="4"
+            className="cell-rules"
+          >
             <Text size="1" weight="bold" className="side-section-label">
               CELL RULES
             </Text>

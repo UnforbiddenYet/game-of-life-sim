@@ -36,6 +36,11 @@ describe('Header', () => {
     expect(screen.getByText(/generation/i)).toHaveTextContent('Generation 42');
   });
 
+  it('shows the current alive cell count next to the title', () => {
+    renderHeader({}, { generation: 0, alive: 87 });
+    expect(screen.getByText(/alive/i)).toHaveTextContent('Alive 87');
+  });
+
   it('triggers onExport when Export is clicked', () => {
     const props = renderHeader();
     fireEvent.click(screen.getByRole('button', { name: /export grid/i }));

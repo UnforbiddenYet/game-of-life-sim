@@ -9,7 +9,7 @@ export interface HeaderProps {
 }
 
 export function Header({ onExport, onImport }: HeaderProps) {
-  const { generation } = useGameTick();
+  const { generation, alive } = useGameTick();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
@@ -33,6 +33,11 @@ export function Header({ onExport, onImport }: HeaderProps) {
             </span>
             <span>
               Generation <strong>{generation}</strong>
+            </span>
+          </Badge>
+          <Badge color="gray" variant="soft" radius="full" size="2">
+            <span>
+              Alive <strong>{alive}</strong>
             </span>
           </Badge>
         </Flex>

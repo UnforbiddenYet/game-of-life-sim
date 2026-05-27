@@ -1,9 +1,9 @@
-import { profile } from '../canvas/profile';
-import type { Grid } from '../types/grid';
-import { createGrid } from './grid';
+import { profile } from "../canvas/profile";
+import type { Grid } from "../types/grid";
+import { createGrid } from "./grid";
 
 export function step(prev: Grid): Grid {
-  return profile('step', () => {
+  return profile("step", () => {
     const out = createGrid(prev.size);
     stepInto(prev, out);
     return out;
@@ -27,16 +27,16 @@ export function stepInto(prev: Grid, out: Grid): void {
       const xR = x + 1;
       let n = 0;
       if (above >= 0) {
-        if (hasLeft) n += cells[above + xL];
-        n += cells[above + x];
-        if (hasRight) n += cells[above + xR];
+        if (hasLeft) n += cells[above + xL] ?? 0;
+        n += cells[above + x] ?? 0;
+        if (hasRight) n += cells[above + xR] ?? 0;
       }
-      if (hasLeft) n += cells[here + xL];
-      if (hasRight) n += cells[here + xR];
+      if (hasLeft) n += cells[here + xL] ?? 0;
+      if (hasRight) n += cells[here + xR] ?? 0;
       if (below >= 0) {
-        if (hasLeft) n += cells[below + xL];
-        n += cells[below + x];
-        if (hasRight) n += cells[below + xR];
+        if (hasLeft) n += cells[below + xL] ?? 0;
+        n += cells[below + x] ?? 0;
+        if (hasRight) n += cells[below + xR] ?? 0;
       }
       const idx = here + x;
       const alive = cells[idx] === 1;

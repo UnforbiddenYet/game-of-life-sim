@@ -32,12 +32,22 @@ function ensureOffscreen(size: number): OffscreenCache {
 
 function hexToPackedRgba(hex: string): number {
   let h = hex.startsWith("#") ? hex.slice(1) : hex;
-  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  if (h.length === 3) {
+    h =
+      h.charAt(0) +
+      h.charAt(0) +
+      h.charAt(1) +
+      h.charAt(1) +
+      h.charAt(2) +
+      h.charAt(2);
+  }
   const r = parseInt(h.slice(0, 2), 16);
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
   const a = h.length === 8 ? parseInt(h.slice(6, 8), 16) : 255;
-  return ((a & 0xff) << 24) | ((b & 0xff) << 16) | ((g & 0xff) << 8) | (r & 0xff);
+  return (
+    ((a & 0xff) << 24) | ((b & 0xff) << 16) | ((g & 0xff) << 8) | (r & 0xff)
+  );
 }
 
 export function drawGrid(

@@ -1,20 +1,17 @@
-import { Box, Button, Flex, Slider, Text, TextField } from '@radix-ui/themes';
-import { Shuffle } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import * as Actions from '../state/actions';
-import { useEngine, useGameDispatch, useGameUi } from '../state/hooks';
+import { Box, Button, Flex, Slider, Text, TextField } from "@radix-ui/themes";
+import { Shuffle } from "lucide-react";
+import { useRef } from "react";
+import * as Actions from "../state/actions";
+import { useEngine, useGameDispatch, useGameUi } from "../state/hooks";
 
 export function SidePanel() {
   const { size, stepsPerSecond } = useGameUi();
   const dispatch = useGameDispatch();
   const engine = useEngine();
-  const [sizeDraft, setSizeDraft] = useState(String(size));
-  useEffect(() => {
-    setSizeDraft(String(size));
-  }, [size]);
+  const sizeInputRef = useRef<HTMLInputElement>(null);
 
   const applyResize = () => {
-    const next = Number(sizeDraft);
+    const next = Number(sizeInputRef.current?.value ?? "");
     if (Number.isInteger(next) && next >= 3 && next <= 1000) {
       dispatch(Actions.newGame(next));
     }
@@ -48,10 +45,11 @@ export function SidePanel() {
               <label>
                 <Text size="2">Grid size</Text>
                 <TextField.Root
+                  key={size}
+                  ref={sizeInputRef}
                   type="number"
                   aria-label="Grid size"
-                  value={sizeDraft}
-                  onChange={(e) => setSizeDraft(e.target.value)}
+                  defaultValue={String(size)}
                 />
               </label>
             </Flex>

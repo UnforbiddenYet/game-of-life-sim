@@ -1,12 +1,18 @@
-import { useGesture } from '@use-gesture/react';
-import { useRef, type Dispatch, type RefObject, type SetStateAction } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
-import { panCamera, screenToCell, zoomCamera } from '../core/camera';
-import type { Engine } from '../core/engine';
-import { getCell, inBounds } from '../core/grid';
-import * as Actions from '../state/actions';
-import { useEngine, useGameDispatch, useGameUi } from '../state/hooks';
-import type { Camera } from '../types/camera';
+import { useGesture } from "@use-gesture/react";
+import {
+  useEffect,
+  useRef,
+  type Dispatch,
+  type RefObject,
+  type SetStateAction,
+} from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { panCamera, screenToCell, zoomCamera } from "../core/camera";
+import type { Engine } from "../core/engine";
+import { getCell, inBounds } from "../core/grid";
+import * as Actions from "../state/actions";
+import { useEngine, useGameDispatch, useGameUi } from "../state/hooks";
+import type { Camera } from "../types/camera";
 
 const WHEEL_ZOOM_SENSITIVITY = 0.001;
 const RANDOMIZE_DENSITY = 0.3;
@@ -35,51 +41,53 @@ export function useGridInteractions({ ref, camera, setCamera }: Args) {
   const stroke = useRef<Stroke | null>(null);
   const spacePressed = useRef(false);
   const engineRef = useRef<Engine>(engine);
-  engineRef.current = engine;
+  useEffect(() => {
+    engineRef.current = engine;
+  });
 
   useHotkeys(
-    'space',
+    "space",
     (e) => {
       e.preventDefault();
-      spacePressed.current = e.type === 'keydown';
+      spacePressed.current = e.type === "keydown";
     },
     { keydown: true, keyup: true },
   );
 
   useHotkeys(
-    'k',
-    () => dispatch(mode === 'playing' ? Actions.pause() : Actions.play()),
+    "k",
+    () => dispatch(mode === "playing" ? Actions.pause() : Actions.play()),
     [mode],
   );
 
   useHotkeys(
-    'right',
+    "right",
     () => {
-      if (mode === 'playing') return;
+      if (mode === "playing") return;
       engineRef.current.step();
     },
     [mode],
   );
 
   useHotkeys(
-    'left',
+    "left",
     () => {
-      if (mode === 'playing') return;
+      if (mode === "playing") return;
       engineRef.current.undo();
     },
     [mode],
   );
 
-  useHotkeys('c', () => engineRef.current.clear());
-  useHotkeys('r', () => engineRef.current.randomize(RANDOMIZE_DENSITY));
+  useHotkeys("c", () => engineRef.current.clear());
+  useHotkeys("r", () => engineRef.current.randomize(RANDOMIZE_DENSITY));
 
   useHotkeys(
-    'bracketright',
+    "bracketright",
     () => dispatch(Actions.setSpeed(stepsPerSecond + 1)),
     [stepsPerSecond],
   );
   useHotkeys(
-    'bracketleft',
+    "bracketleft",
     () => dispatch(Actions.setSpeed(stepsPerSecond - 1)),
     [stepsPerSecond],
   );

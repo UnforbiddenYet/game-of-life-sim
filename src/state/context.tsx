@@ -2,25 +2,19 @@ import {
   useEffect,
   useMemo,
   useReducer,
-  useRef,
   useState,
   type ReactNode,
-} from 'react';
-import { createEngine, type Engine } from '../core/engine';
-import { aliveCount } from '../core/grid';
-import type { GameTick, GameUi } from '../types/game';
-import {
-  DEFAULT_SIZE,
-  DEFAULT_SPS,
-  initialUi,
-  uiReducer,
-} from './uiReducer';
+} from "react";
+import { createEngine } from "../core/engine";
+import { aliveCount } from "../core/grid";
+import type { GameTick, GameUi } from "../types/game";
+import { DEFAULT_SIZE, DEFAULT_SPS, initialUi, uiReducer } from "./uiReducer";
 import {
   DispatchContext,
   EngineContext,
   TickContext,
   UiContext,
-} from './hooks';
+} from "./hooks";
 
 const PULSE_MS = 100;
 
@@ -39,14 +33,13 @@ export function GameProvider({
     initialUi(size, stepsPerSecond),
   );
 
-  const engineRef = useRef<Engine | null>(null);
-  if (engineRef.current === null) {
-    engineRef.current = createEngine(ui.size);
-  }
-  if (engineRef.current.current.size !== ui.size) {
-    engineRef.current.reset(ui.size);
-  }
-  const engine = engineRef.current;
+  const [engine] = useState(() => createEngine(ui.size));
+
+  useEffect(() => {
+    if (engine.current.size !== ui.size) {
+      engine.reset(ui.size);
+    }
+  }, [engine, ui.size]);
 
   const [tick, setTick] = useState<GameTick>({ generation: 0, alive: 0 });
   const [canUndo, setCanUndo] = useState(false);
@@ -68,10 +61,7 @@ export function GameProvider({
     return () => window.clearInterval(id);
   }, [engine]);
 
-  const uiValue: GameUi = useMemo(
-    () => ({ ...ui, canUndo }),
-    [ui, canUndo],
-  );
+  const uiValue: GameUi = useMemo(() => ({ ...ui, canUndo }), [ui, canUndo]);
 
   return (
     <DispatchContext.Provider value={dispatch}>

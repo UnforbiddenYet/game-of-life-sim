@@ -2,34 +2,42 @@ import { profile } from '../canvas/profile';
 import type { Grid } from '../types/grid';
 import { createGrid } from './grid';
 
-function countNeighbours(g: Grid, x: number, y: number): number {
-  const { size, cells } = g;
-  let n = 0;
-  for (let dy = -1; dy <= 1; dy++) {
-    for (let dx = -1; dx <= 1; dx++) {
-      if (dx === 0 && dy === 0) continue;
-      const nx = x + dx;
-      const ny = y + dy;
-      if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
-        if (cells[ny * size + nx] === 1) n++;
-      }
-    }
-  }
-  return n;
-}
-
 export function step(prev: Grid): Grid {
   return profile('step', () => stepImpl(prev));
 }
 
 function stepImpl(prev: Grid): Grid {
-  const { size, cells } = prev;
+  const size = prev.size;
+  const cells = prev.cells;
   const out = createGrid(size);
+  const outCells = out.cells;
+  const last = size - 1;
+
   for (let y = 0; y < size; y++) {
+    const above = y > 0 ? (y - 1) * size : -1;
+    const here = y * size;
+    const below = y < last ? (y + 1) * size : -1;
     for (let x = 0; x < size; x++) {
-      const n = countNeighbours(prev, x, y);
-      const alive = cells[y * size + x] === 1;
-      out.cells[y * size + x] = (alive ? n === 2 || n === 3 : n === 3) ? 1 : 0;
+      const hasLeft = x > 0;
+      const hasRight = x < last;
+      const xL = x - 1;
+      const xR = x + 1;
+      let n = 0;
+      if (above >= 0) {
+        if (hasLeft) n += cells[above + xL];
+        n += cells[above + x];
+        if (hasRight) n += cells[above + xR];
+      }
+      if (hasLeft) n += cells[here + xL];
+      if (hasRight) n += cells[here + xR];
+      if (below >= 0) {
+        if (hasLeft) n += cells[below + xL];
+        n += cells[below + x];
+        if (hasRight) n += cells[below + xR];
+      }
+      const idx = here + x;
+      const alive = cells[idx] === 1;
+      outCells[idx] = (alive ? n === 2 || n === 3 : n === 3) ? 1 : 0;
     }
   }
   return out;

@@ -80,6 +80,27 @@ describe('drawGrid', () => {
     expect(fillsAfterShapes).toHaveLength(1);
   });
 
+  it('uses plain rect (no rounding) at low zoom', () => {
+    const ctx = makeCtx(60, 60);
+    const grid = createGrid(10);
+    setCell(grid, 0, 0, 1);
+
+    drawGrid(
+      ctx,
+      grid,
+      { x: 0, y: 0, z: 6 },
+      { width: 60, height: 60 },
+      theme,
+    );
+
+    const events = ctx.__getEvents();
+    expect(events.filter((e) => e.type === 'roundRect')).toHaveLength(0);
+    const aliveRects = events.filter(
+      (e) => e.type === 'rect' && e.props.width === 1 && e.props.height === 1,
+    );
+    expect(aliveRects).toHaveLength(1);
+  });
+
   it('skips cells outside the visible viewport', () => {
     const ctx = makeCtx(60, 60);
     const grid = createGrid(10);

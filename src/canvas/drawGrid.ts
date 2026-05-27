@@ -4,6 +4,8 @@ import type { Grid } from "../types/grid";
 
 // Below this many screen pixels per cell, grid lines obscure cells more than help.
 const GRID_LINE_MIN_CELL_PX = 8;
+// Below this many screen pixels per cell, rounded corners are invisible.
+const ROUNDED_CELL_MIN_PX = 8;
 
 export function drawGrid(
   ctx: CanvasRenderingContext2D,
@@ -32,9 +34,6 @@ export function drawGrid(
   }
 
   ctx.fillStyle = theme.alive;
-  const inset = 0.08;
-  const size = 1 - inset * 2;
-  const radius = 0.2;
   const xMin = Math.max(0, Math.floor(-camera.x));
   const yMin = Math.max(0, Math.floor(-camera.y));
   const xMax = Math.min(
@@ -46,11 +45,25 @@ export function drawGrid(
     Math.ceil(-camera.y + viewport.height / camera.z) - 1,
   );
   ctx.beginPath();
-  for (let y = yMin; y <= yMax; y++) {
-    const row = y * grid.size;
-    for (let x = xMin; x <= xMax; x++) {
-      if (grid.cells[row + x] === 1) {
-        ctx.roundRect(x + inset, y + inset, size, size, radius);
+  if (camera.z >= ROUNDED_CELL_MIN_PX) {
+    const inset = 0.08;
+    const size = 1 - inset * 2;
+    const radius = 0.2;
+    for (let y = yMin; y <= yMax; y++) {
+      const row = y * grid.size;
+      for (let x = xMin; x <= xMax; x++) {
+        if (grid.cells[row + x] === 1) {
+          ctx.roundRect(x + inset, y + inset, size, size, radius);
+        }
+      }
+    }
+  } else {
+    for (let y = yMin; y <= yMax; y++) {
+      const row = y * grid.size;
+      for (let x = xMin; x <= xMax; x++) {
+        if (grid.cells[row + x] === 1) {
+          ctx.rect(x, y, 1, 1);
+        }
       }
     }
   }

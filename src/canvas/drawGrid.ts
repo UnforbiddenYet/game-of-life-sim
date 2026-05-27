@@ -35,10 +35,21 @@ export function drawGrid(
   const inset = 0.08;
   const size = 1 - inset * 2;
   const radius = 0.2;
+  const xMin = Math.max(0, Math.floor(-camera.x));
+  const yMin = Math.max(0, Math.floor(-camera.y));
+  const xMax = Math.min(
+    grid.size - 1,
+    Math.ceil(-camera.x + viewport.width / camera.z) - 1,
+  );
+  const yMax = Math.min(
+    grid.size - 1,
+    Math.ceil(-camera.y + viewport.height / camera.z) - 1,
+  );
   ctx.beginPath();
-  for (let y = 0; y < grid.size; y++) {
-    for (let x = 0; x < grid.size; x++) {
-      if (grid.cells[y * grid.size + x] === 1) {
+  for (let y = yMin; y <= yMax; y++) {
+    const row = y * grid.size;
+    for (let x = xMin; x <= xMax; x++) {
+      if (grid.cells[row + x] === 1) {
         ctx.roundRect(x + inset, y + inset, size, size, radius);
       }
     }

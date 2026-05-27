@@ -80,6 +80,25 @@ describe('drawGrid', () => {
     expect(fillsAfterShapes).toHaveLength(1);
   });
 
+  it('skips cells outside the visible viewport', () => {
+    const ctx = makeCtx(60, 60);
+    const grid = createGrid(10);
+    for (let y = 0; y < 10; y++) {
+      for (let x = 0; x < 10; x++) setCell(grid, x, y, 1);
+    }
+
+    drawGrid(
+      ctx,
+      grid,
+      { x: 0, y: 0, z: 20 },
+      { width: 60, height: 60 },
+      theme,
+    );
+
+    const shapes = ctx.__getEvents().filter((e) => e.type === 'roundRect');
+    expect(shapes).toHaveLength(9);
+  });
+
   it('draws grid lines when each cell is large enough to read them', () => {
     const ctx = makeCtx(60, 60);
     drawGrid(

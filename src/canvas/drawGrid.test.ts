@@ -54,6 +54,32 @@ describe('drawGrid', () => {
     expect(shape.props.width).toBeLessThanOrEqual(1);
   });
 
+  it('batches all alive cells into a single fill', () => {
+    const ctx = makeCtx(60, 60);
+    const grid = createGrid(3);
+    setCell(grid, 0, 0, 1);
+    setCell(grid, 1, 1, 1);
+    setCell(grid, 2, 2, 1);
+
+    drawGrid(
+      ctx,
+      grid,
+      { x: 0, y: 0, z: 20 },
+      { width: 60, height: 60 },
+      theme,
+    );
+
+    const events = ctx.__getEvents();
+    const shapes = events.filter((e) => e.type === 'roundRect');
+    expect(shapes).toHaveLength(3);
+
+    const firstShape = events.findIndex((e) => e.type === 'roundRect');
+    const fillsAfterShapes = events
+      .slice(firstShape)
+      .filter((e) => e.type === 'fill');
+    expect(fillsAfterShapes).toHaveLength(1);
+  });
+
   it('draws grid lines when each cell is large enough to read them', () => {
     const ctx = makeCtx(60, 60);
     drawGrid(

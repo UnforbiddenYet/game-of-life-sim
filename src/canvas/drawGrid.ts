@@ -1,6 +1,6 @@
-import type { Camera, Viewport } from '../types/camera';
-import type { CanvasTheme } from '../types/canvas';
-import type { Grid } from '../types/grid';
+import type { Camera, Viewport } from "../types/camera";
+import type { CanvasTheme } from "../types/canvas";
+import type { Grid } from "../types/grid";
 
 // Below this many screen pixels per cell, grid lines obscure cells more than help.
 const GRID_LINE_MIN_CELL_PX = 8;
@@ -35,15 +35,15 @@ export function drawGrid(
   const inset = 0.08;
   const size = 1 - inset * 2;
   const radius = 0.2;
+  ctx.beginPath();
   for (let y = 0; y < grid.size; y++) {
     for (let x = 0; x < grid.size; x++) {
       if (grid.cells[y * grid.size + x] === 1) {
-        ctx.beginPath();
         ctx.roundRect(x + inset, y + inset, size, size, radius);
-        ctx.fill();
       }
     }
   }
+  ctx.fill();
 }
 
 function drawGridLines(

@@ -3,13 +3,16 @@ import type { Grid } from '../types/grid';
 import { createGrid } from './grid';
 
 export function step(prev: Grid): Grid {
-  return profile('step', () => stepImpl(prev));
+  return profile('step', () => {
+    const out = createGrid(prev.size);
+    stepInto(prev, out);
+    return out;
+  });
 }
 
-function stepImpl(prev: Grid): Grid {
+export function stepInto(prev: Grid, out: Grid): void {
   const size = prev.size;
   const cells = prev.cells;
-  const out = createGrid(size);
   const outCells = out.cells;
   const last = size - 1;
 
@@ -40,5 +43,4 @@ function stepImpl(prev: Grid): Grid {
       outCells[idx] = (alive ? n === 2 || n === 3 : n === 3) ? 1 : 0;
     }
   }
-  return out;
 }

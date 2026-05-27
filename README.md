@@ -29,7 +29,7 @@ The application is deployed and available to play online at:
 
 
 ### Bonus Mechanics TODO
-- **Colorized Inheritance:** Newborn cells dynamically inherit colors from the most prevalent lineage of surrounding cells.
+- [ ] **Colorized Inheritance:** Newborn cells dynamically inherit colors from the most prevalent lineage of surrounding cells.
 
 
 ---

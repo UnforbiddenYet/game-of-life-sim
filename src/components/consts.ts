@@ -2,8 +2,8 @@ import type { CanvasTheme } from "../types/canvas";
 import type { Shortcut } from "../types/ui";
 
 export const DEFAULT_THEME: CanvasTheme = {
-  background: "#eef1ef",
-  grid: "#dde2de",
+  background: "#e8edf1",
+  grid: "#d6dce2",
   alive: "#2c3441",
 };
 

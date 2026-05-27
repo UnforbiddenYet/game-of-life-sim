@@ -1,3 +1,4 @@
+import { profile } from '../canvas/profile';
 import type { Grid } from '../types/grid';
 import { createGrid } from './grid';
 
@@ -18,6 +19,10 @@ function countNeighbours(g: Grid, x: number, y: number): number {
 }
 
 export function step(prev: Grid): Grid {
+  return profile('step', () => stepImpl(prev));
+}
+
+function stepImpl(prev: Grid): Grid {
   const { size, cells } = prev;
   const out = createGrid(size);
   for (let y = 0; y < size; y++) {
